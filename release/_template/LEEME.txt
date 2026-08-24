@@ -1,0 +1,100 @@
+================================================================================
+  FoxBin2Prg-Studio 0.1.0
+  GUI de administracion para FoxBin2Prg — utilitario generico VFP9
+  ADS Software — 2026
+================================================================================
+
+
+CONTENIDO DEL PAQUETE
+---------------------
+
+  FoxBin2Prg-Studio.exe   Ejecutable autocontenido (~48 MB).
+                          Incluye Python + Qt + PySide6 + FoxBin2Prg embebido
+                          (v1.21, redistribuido bajo CC BY 4.0).
+
+  LEEME.txt               Este archivo.
+  LICENCIA.txt            Terminos de licencia y atribuciones.
+  CAMBIOS.txt             Historial de cambios.
+
+
+REQUISITOS
+----------
+
+  Windows 10 / 11 (64 bits).
+
+  Visual FoxPro 9 SP2 (build >= 3504) instalado en la maquina.
+  Rutas tipicas que la GUI autodetecta:
+    - C:\Fenix\AdsFenix\Librerias\vfp9.exe
+    - C:\Program Files (x86)\Microsoft Visual FoxPro 9\vfp9.exe
+
+  Si vfp9.exe esta en otro lugar: menu Herramientas > Preferencias.
+
+  Nada mas hace falta. FoxBin2Prg (FoxBin2Prg.EXE + filename_caps.exe +
+  filename_caps.cfg) ya viene embebido dentro del ejecutable.
+
+
+INSTALACION
+-----------
+
+  1. Copiar el .exe donde quieran (Escritorio, C:\Tools\, red, no importa).
+  2. Doble click en FoxBin2Prg-Studio.exe.
+
+  No requiere instalador. No modifica el registro. No pide permisos de
+  administrador.
+
+  Las preferencias del usuario (rutas override, opciones por defecto) se
+  guardan en:
+    %APPDATA%\ADS Software\FoxBin2Prg-Studio.ini
+
+
+PRIMER USO
+----------
+
+  1. Abrir FoxBin2Prg-Studio.exe.
+
+  2. Ir a la pestana "Acerca de" para verificar que detecto vfp9.exe.
+     Si dice "<no encontrado>", ir a Herramientas > Preferencias y setear
+     la ruta manualmente.
+
+  3. Ir a la pestana "Convertir".
+
+  4. Arrastrar sobre el campo "Archivo" cualquier binario VFP:
+       - .scx / .sct (formularios)
+       - .vcx / .vct (class libraries)
+       - .pjx / .pjt (proyectos)
+       - .frx / .lbx / .mnx / .dbc / .dbf
+     O el archivo de texto equivalente (.sc2 / .vc2 / .pj2 / etc).
+
+  5. La operacion (Bin -> Prg o Prg -> Bin) se detecta por la extension.
+     Se puede forzar con los radio buttons.
+
+  6. Click en "Ejecutar". El log al pie muestra el progreso en vivo:
+       job_start -> op_start -> file_processed -> op_done -> job_done
+
+
+OPCIONES AVANZADAS
+------------------
+
+  Colapsables (por defecto ocultas):
+
+    Limpiar timestamps          Recomendado ON. Reduce diferencias falsas
+                                en control de version.
+    Limpiar UniqueID            Recomendado ON. Idem.
+    Recompilar tras generar     Recomendado ON. Fuerza recompilacion del
+                                binario tras Prg -> Bin.
+    Solo simular (dry-run)      Muestra que archivos se procesarian sin
+                                tocar disco. Requiere l_ProcessFiles=.F.
+                                del Object API.
+    Backups (n .bak)            Cuantos niveles de .bak crear. 0 = no backup.
+    Debug                       0 = sin log, 1 = log por archivo, 2 = extendido.
+
+
+REPORTAR PROBLEMAS
+------------------
+
+  Contacto: desarrolloads@adsecuador.com
+
+
+================================================================================
+  FIN DEL LEEME
+================================================================================

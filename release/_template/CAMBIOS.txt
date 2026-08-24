@@ -1,0 +1,32 @@
+================================================================================
+  FoxBin2Prg-Studio — Historial de cambios
+================================================================================
+
+
+VERSION 0.1.0 — 2026-08-24
+--------------------------
+
+  Primera version MVP.
+
+  Nuevo:
+    - GUI de escritorio (PySide6) con pestanas Convertir y Acerca de.
+    - Pestana Convertir:
+        Origen (archivo o texto), operacion (auto por extension /
+        forzada), opciones avanzadas (timestamps, UniqueID, backups,
+        debug, dry-run), preview del job.ini, log en vivo con colores.
+    - Pestana Acerca de: diagnostico de rutas detectadas y creditos.
+    - Herramientas > Preferencias: override de rutas a vfp9.exe y
+      FoxBin2Prg, persistido en QSettings.
+    - Comunicacion con FoxBin2Prg via Object API (c_foxbin2prg) a traves
+      de un driver PRG propio. Reporta excepciones estructuradas
+      (mensaje, linea, detalle) — muy por encima del ErrorLevel 0/1 del
+      CLI clasico.
+    - FoxBin2Prg v1.21 embebido en el .exe (CC BY 4.0).
+    - Deteccion de dark mode del sistema con paleta consistente.
+    - Preview del job.ini que crece con el contenido.
+
+  Requisitos externos:
+    - Solo VFP9 SP2 instalado en la maquina destino.
+
+
+================================================================================

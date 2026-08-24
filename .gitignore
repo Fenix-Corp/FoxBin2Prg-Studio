@@ -48,3 +48,7 @@ Desktop.ini
 
 # Sensibles / propios de la máquina
 .fb2p_studio_local.ini
+
+# Paquetes de release generados (el template si se versiona)
+release/FoxBin2Prg-Studio-*/
+release/*.zip

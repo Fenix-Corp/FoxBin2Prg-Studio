@@ -1,0 +1,71 @@
+================================================================================
+  FoxBin2Prg-Studio 0.1.0 — LICENCIA Y ATRIBUCIONES
+================================================================================
+
+
+1) FoxBin2Prg-Studio
+--------------------
+
+  Copyright (c) 2026 ADS Software
+
+  Se otorga permiso, gratuito, a cualquier persona que obtenga una copia
+  de este software y de los archivos de documentacion asociados (el
+  "Software"), para tratar el Software sin restricciones, incluidos, entre
+  otros, los derechos para usar, copiar, modificar, fusionar, publicar,
+  distribuir, sublicenciar y/o vender copias del Software, y para permitir
+  a las personas a quienes se les proporcione el Software hacer lo mismo,
+  sujeto a las siguientes condiciones:
+
+  El aviso de copyright anterior y este aviso de permiso se incluiran en
+  todas las copias o partes sustanciales del Software.
+
+  EL SOFTWARE SE PROPORCIONA "TAL CUAL", SIN GARANTIA DE NINGUN TIPO,
+  EXPRESA O IMPLICITA, INCLUYENDO PERO NO LIMITADO A LAS GARANTIAS DE
+  COMERCIABILIDAD, IDONEIDAD PARA UN PROPOSITO PARTICULAR Y NO INFRACCION.
+  EN NINGUN CASO LOS AUTORES O TITULARES DE LOS DERECHOS DE AUTOR SERAN
+  RESPONSABLES POR NINGUN RECLAMO, DANO O RESPONSABILIDAD, YA SEA EN UNA
+  ACCION DE CONTRATO, AGRAVIO U OTRO MOTIVO, DERIVADO DE, FUERA DE O EN
+  CONEXION CON EL SOFTWARE O EL USO U OTROS TRATOS EN EL SOFTWARE.
+
+  (Licencia MIT — https://opensource.org/licenses/MIT)
+
+
+2) FoxBin2Prg (embebido)
+------------------------
+
+  El ejecutable de FoxBin2Prg-Studio incluye archivos redistribuidos del
+  proyecto FoxBin2Prg:
+
+    - FoxBin2Prg.EXE
+    - filename_caps.exe
+    - filename_caps.cfg
+    - foxbin2prg.pj2  (para deteccion de version)
+
+  Autor original: Fernando D. Bozzo
+                  https://github.com/fdbozzo/foxbin2prg
+  Mantenedor:     Lutz Scheffler
+                  https://github.com/lscheffler/foxbin2prg
+
+  Licencia:       Creative Commons Attribution 4.0 International (CC BY 4.0)
+                  https://creativecommons.org/licenses/by/4.0/
+
+  Estos archivos se redistribuyen sin modificacion, cumpliendo con los
+  terminos de la licencia. La atribucion tambien figura en la pestana
+  "Acerca de" de la GUI.
+
+
+3) Bibliotecas Python / Qt (embebidas por PyInstaller)
+------------------------------------------------------
+
+  Python                Python Software Foundation License (PSF)
+                        https://docs.python.org/3/license.html
+
+  PySide6 / Qt          GNU Lesser General Public License v3 (LGPL v3)
+                        https://www.qt.io/licensing/
+
+  PyInstaller           GPL con excepcion para archivos generados
+                        (los .exe empaquetados no heredan la GPL de
+                        PyInstaller).
+
+
+================================================================================
