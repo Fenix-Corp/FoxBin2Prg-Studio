@@ -1,0 +1,24 @@
+# Python: LF, UTF-8
+*.py     text eol=lf
+*.toml   text eol=lf
+*.cfg    text eol=lf
+*.md     text eol=lf
+*.txt    text eol=lf
+
+# VFP: CRLF + working tree en Windows-1252 (para no romper acentos)
+*.prg    text eol=crlf working-tree-encoding=windows-1252
+*.fpw    text eol=crlf working-tree-encoding=windows-1252
+
+# Batch: CRLF
+*.bat    text eol=crlf
+*.cmd    text eol=crlf
+
+# JSON: LF
+*.json   text eol=lf
+
+# Binarios
+*.fxp    binary
+*.exe    binary
+*.png    binary
+*.ico    binary
+*.qrc    text eol=lf

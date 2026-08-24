@@ -1,0 +1,4 @@
+SCREEN=OFF
+TITLE=FoxBin2Prg-Studio Bridge
+RESOURCE=OFF
+COMMAND=DO fb2p_bridge.prg

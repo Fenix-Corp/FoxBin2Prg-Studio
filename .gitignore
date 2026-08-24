@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.env
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+build/dist/
+dist/
+
+# PyInstaller
+build/*.toc
+build/*.pkg
+build/warn-*.txt
+build/xref-*.html
+build/COLLECT-*.toc
+build/PYZ-*.pyz
+build/PKG-*.pkg
+build/EXE-*.toc
+build/Analysis-*.toc
+build/*.spec.bak
+
+# VFP
+*.fxp
+*.err
+*.bak
+foxbin2prg_errorlog.ERR
+_FileName_Caps.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Sensibles / propios de la máquina
+.fb2p_studio_local.ini
