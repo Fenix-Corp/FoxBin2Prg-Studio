@@ -16,6 +16,7 @@ build/dist/
 dist/
 
 # PyInstaller
+build/fb2p_studio/
 build/*.toc
 build/*.pkg
 build/warn-*.txt

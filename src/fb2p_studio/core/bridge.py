@@ -82,7 +82,11 @@ class Bridge(QObject):
 
         self._proc = QProcess(self)
         self._proc.setProgram(str(self._paths.vfp_exe))
-        self._proc.setArguments(["-T", "-C", str(self._paths.bridge_dir / "fb2p_bridge.fpw")])
+        # VFP requiere que -C vaya PEGADO al path del fpw (sin espacio):
+        # "-Cpath\\fpw", no ["-C", "path\\fpw"]. Si van separados, VFP toma
+        # -C como flag vacio y abre el fpw en el editor.
+        fpw_path = self._paths.bridge_dir / "fb2p_bridge.fpw"
+        self._proc.setArguments(["-T", f"-C{fpw_path}"])
         self._proc.setWorkingDirectory(str(self._paths.bridge_dir))
         self._proc.setProcessEnvironment(env)
         self._proc.readyReadStandardOutput.connect(self._on_stdout)
