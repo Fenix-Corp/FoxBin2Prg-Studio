@@ -18,10 +18,16 @@ MVP en construcción. Tabs previstas:
 
 ## Requisitos de la máquina destino
 
+Sólo **una** dependencia externa: Visual FoxPro 9 SP2 instalado (build ≥ 3504). No se puede embeber por licencia de Microsoft — pero cualquier desarrollador VFP9 ya lo tiene.
+
 | Requisito | Ruta típica | Override |
 |---|---|---|
-| Visual FoxPro 9 SP2 (build ≥ 3504) | `C:\Fenix\AdsFenix\Librerias\vfp9.exe` | var. entorno `VFP_EXE` o Preferencias |
-| FoxBin2Prg (`.EXE` o `.FXP`) | `D:\FenixPro\Proyectos\foxbin2prg\` | var. entorno `FB2P_HOME` o Preferencias |
+| **Externo:** `vfp9.exe` | `C:\Fenix\AdsFenix\Librerias\vfp9.exe` o `C:\Program Files (x86)\Microsoft Visual FoxPro 9\` | var. entorno `VFP_EXE` o Preferencias |
+| **Embebido:** FoxBin2Prg (~857 KB) | `bundled/foxbin2prg/` (dev), `_MEIPASS/bundled/foxbin2prg/` (empaquetado) | var. entorno `FB2P_HOME` o Preferencias |
+
+Orden de resolución de FoxBin2Prg: `Preferencias` → `FB2P_HOME` → rutas típicas → **bundle embebido** (fallback).
+
+Esto significa que si `Preferencias` está vacío y `FB2P_HOME` no apunta a nada válido, Studio usa el FoxBin2Prg que trae adentro — el usuario no necesita instalar nada más.
 
 ## Arquitectura
 

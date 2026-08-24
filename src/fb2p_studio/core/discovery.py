@@ -25,6 +25,20 @@ _FB2P_TYPICAL = [
 ]
 
 
+def _bundled_fb2p_dir() -> Path | None:
+    """Ubicacion del FoxBin2Prg embebido.
+
+    En dev: `<repo>/bundled/foxbin2prg/`.
+    Empaquetado (PyInstaller onefile): `sys._MEIPASS/bundled/foxbin2prg/`.
+    """
+    if getattr(sys, "frozen", False):
+        base = Path(getattr(sys, "_MEIPASS", Path(sys.executable).parent))
+        candidate = base / "bundled" / "foxbin2prg"
+    else:
+        candidate = Path(__file__).resolve().parents[3] / "bundled" / "foxbin2prg"
+    return candidate if _has_fb2p(candidate) else None
+
+
 @dataclass(slots=True, frozen=True)
 class Paths:
     vfp_exe: Path | None
@@ -51,7 +65,10 @@ def find_vfp_exe(override: str | os.PathLike | None = None) -> Path | None:
 
 
 def find_fb2p_home(override: str | os.PathLike | None = None) -> Path | None:
-    """Devuelve la carpeta que contiene FoxBin2Prg.EXE o .FXP."""
+    """Devuelve la carpeta que contiene FoxBin2Prg.EXE o .FXP.
+
+    Orden: override -> FB2P_HOME -> rutas tipicas -> FoxBin2Prg embebido.
+    """
     if override:
         p = Path(override)
         if _has_fb2p(p):
@@ -66,7 +83,8 @@ def find_fb2p_home(override: str | os.PathLike | None = None) -> Path | None:
         p = Path(cand)
         if _has_fb2p(p):
             return p
-    return None
+    # Ultimo fallback: el FoxBin2Prg que empaqueta el propio Studio
+    return _bundled_fb2p_dir()
 
 
 def _has_fb2p(folder: Path) -> bool:

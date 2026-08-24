@@ -30,10 +30,14 @@ class AboutTab(QWidget):
         form.addRow("Bridge PRG:", self._lbl_bridge)
 
         credits = QLabel(
-            "<p>FoxBin2Prg es obra de <a href='https://github.com/fdbozzo/foxbin2prg'>Fernando D. Bozzo</a> "
-            "y mantenido por <a href='https://github.com/lscheffler'>Lutz Scheffler</a>.</p>"
-            "<p>Esta GUI la habla vía <b>Object API</b> (<code>c_foxbin2prg</code>) para reportar errores "
-            "estructurados en vez del <code>ErrorLevel 0/1</code> del CLI.</p>"
+            "<p><b>FoxBin2Prg</b> es obra de <a href='https://github.com/fdbozzo/foxbin2prg'>Fernando D. Bozzo</a> "
+            "y mantenido por <a href='https://github.com/lscheffler/foxbin2prg'>Lutz Scheffler</a>. "
+            "Se distribuye bajo licencia "
+            "<a href='https://creativecommons.org/licenses/by/4.0/'>CC BY 4.0</a>.</p>"
+            "<p>Esta GUI habla con FoxBin2Prg vía su <b>Object API</b> (<code>c_foxbin2prg</code>) "
+            "para reportar errores estructurados (excepción, línea, detalle) en lugar del "
+            "<code>ErrorLevel 0/1</code> del CLI.</p>"
+            "<p>FoxBin2Prg-Studio: MIT.</p>"
         )
         credits.setTextFormat(Qt.TextFormat.RichText)
         credits.setOpenExternalLinks(True)

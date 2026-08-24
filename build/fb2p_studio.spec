@@ -12,10 +12,17 @@ from pathlib import Path
 
 ROOT = Path(SPECPATH).parent  # noqa: F821 — SPECPATH lo inyecta PyInstaller
 BRIDGE = ROOT / "vfp_bridge"
+BUNDLED = ROOT / "bundled" / "foxbin2prg"
 
 datas = [
     (str(BRIDGE / "fb2p_bridge.prg"), "vfp_bridge"),
     (str(BRIDGE / "fb2p_bridge.fpw"), "vfp_bridge"),
+    # FoxBin2Prg redistribuible (CC BY 4.0, ver bundled/foxbin2prg/ATTRIBUTION.md)
+    (str(BUNDLED / "FoxBin2Prg.EXE"),    "bundled/foxbin2prg"),
+    (str(BUNDLED / "filename_caps.exe"), "bundled/foxbin2prg"),
+    (str(BUNDLED / "filename_caps.cfg"), "bundled/foxbin2prg"),
+    (str(BUNDLED / "foxbin2prg.pj2"),    "bundled/foxbin2prg"),
+    (str(BUNDLED / "ATTRIBUTION.md"),    "bundled/foxbin2prg"),
 ]
 
 a = Analysis(

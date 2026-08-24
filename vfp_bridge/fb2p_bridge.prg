@@ -68,17 +68,10 @@ CATCH TO loEx
     QUIT
 ENDTRY
 
-* Version de FoxBin2Prg via VERNO (retorna por referencia en el mismo param)
-lcFB2PVer = "VERNO"
-TRY
-    loFB.execute(@lcFB2PVer)
-CATCH
-    lcFB2PVer = ""
-ENDTRY
-* Fallback: si vino con backslash o "VERNO" literal o esta vacio, no se pudo
-IF ISNULL(lcFB2PVer) OR lcFB2PVer == "VERNO" OR EMPTY(lcFB2PVer) OR "\" $ lcFB2PVer
-    lcFB2PVer = ""
-ENDIF
+* Version de FoxBin2Prg: leemos foxbin2prg.pj2 (o cualquier .*2 del home),
+* que contiene el tag "Version=\"1.21\"" en la cabecera. VERNO pass-by-ref
+* no devuelve la version en algunos builds, este metodo es 100% confiable.
+lcFB2PVer = detect_fb2p_version(lcHome)
 
 lcVFPVer = VERSION(4)
 
@@ -317,6 +310,36 @@ FUNCTION iso_now
         "T" + PADL(TRANSFORM(HOUR(lt)), 2, "0") + ":" + ;
         PADL(TRANSFORM(MINUTE(lt)), 2, "0") + ":" + ;
         PADL(TRANSFORM(SEC(lt)), 2, "0")
+ENDFUNC
+
+FUNCTION detect_fb2p_version
+    * Extrae el numero de version del header de foxbin2prg.pj2, que se ve asi:
+    *   *< FOXBIN2PRG: Version="1.21" SourceFile="foxbin2prg.pjx" CPID="1252" />
+    LPARAMETERS tcHome
+    LOCAL lcHeader, lcPj2, lnStart, lnEnd, lcAfter, lcResult
+    lcResult = ""
+    lcPj2 = ADDBS(nvs(tcHome)) + "foxbin2prg.pj2"
+    IF NOT FILE(lcPj2)
+        RETURN ""
+    ENDIF
+    TRY
+        lcHeader = FILETOSTR(lcPj2)
+        IF LEN(lcHeader) > 2048
+            lcHeader = LEFT(lcHeader, 2048)
+        ENDIF
+        lnStart = ATC('Version="', lcHeader)
+        IF lnStart > 0
+            lnStart = lnStart + LEN('Version="')
+            lcAfter = SUBSTR(lcHeader, lnStart)
+            lnEnd = AT('"', lcAfter)
+            IF lnEnd > 1
+                lcResult = ALLTRIM(LEFT(lcAfter, lnEnd - 1))
+            ENDIF
+        ENDIF
+    CATCH
+        lcResult = ""
+    ENDTRY
+    RETURN lcResult
 ENDFUNC
 
 FUNCTION sanitize_ctype
