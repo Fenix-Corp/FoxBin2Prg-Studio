@@ -38,15 +38,17 @@ from fb2p_studio.core.job import (
     OperationOptions,
 )
 from fb2p_studio.core.settings import Settings
+from fb2p_studio.ui.theme import LogColors
 from fb2p_studio.ui.widgets.command_preview import CommandPreview
 from fb2p_studio.ui.widgets.log_view import LogView
 from fb2p_studio.ui.widgets.path_picker import PathPicker
 
 
 class ConvertTab(QWidget):
-    def __init__(self, settings: Settings, parent: QWidget | None = None) -> None:
+    def __init__(self, settings: Settings, log_colors: LogColors, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._settings = settings
+        self._log_colors = log_colors
         self._bridge: Bridge | None = None
 
         # --- top: origen + operacion + opciones ---
@@ -117,7 +119,7 @@ class ConvertTab(QWidget):
         run_row.addWidget(self._btn_run)
 
         # --- log ---
-        self._log = LogView()
+        self._log = LogView(self._log_colors)
 
         # --- layout con splitter ---
         top_widget = QWidget()

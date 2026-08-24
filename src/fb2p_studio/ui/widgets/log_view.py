@@ -1,22 +1,28 @@
-"""Vista de log con toolbar (limpiar / guardar) y colores por severidad."""
+"""Vista de log con toolbar (limpiar / guardar) y colores por severidad.
+
+Los colores por nivel vienen del modulo `theme` para que se ajusten al
+tema del OS (claro/oscuro).
+"""
 
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor, QFont, QTextCharFormat, QTextCursor
+from PySide6.QtGui import QFont, QTextCharFormat, QTextCursor
 from PySide6.QtWidgets import (
     QFileDialog,
+    QHBoxLayout,
     QPlainTextEdit,
     QPushButton,
     QVBoxLayout,
-    QHBoxLayout,
     QWidget,
 )
 
+from fb2p_studio.ui.theme import LogColors
+
 
 class LogView(QWidget):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, colors: LogColors, parent: QWidget | None = None) -> None:
         super().__init__(parent)
+        self._colors = colors
 
         self._edit = QPlainTextEdit(self)
         self._edit.setReadOnly(True)
@@ -42,12 +48,12 @@ class LogView(QWidget):
 
     def append(self, text: str, severity: str = "info") -> None:
         color = {
-            "info": QColor("#212121"),
-            "ok": QColor("#1b7f34"),
-            "warn": QColor("#a86500"),
-            "error": QColor("#c62828"),
-            "muted": QColor("#767676"),
-        }.get(severity, QColor("#212121"))
+            "info": self._colors.info,
+            "ok": self._colors.ok,
+            "warn": self._colors.warn,
+            "error": self._colors.error,
+            "muted": self._colors.muted,
+        }.get(severity, self._colors.info)
         cursor = self._edit.textCursor()
         cursor.movePosition(QTextCursor.MoveOperation.End)
         fmt = QTextCharFormat()

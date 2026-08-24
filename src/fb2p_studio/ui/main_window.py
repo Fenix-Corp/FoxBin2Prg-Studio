@@ -10,10 +10,11 @@ from fb2p_studio.core.settings import Settings
 from fb2p_studio.ui.dialog_preferences import PreferencesDialog
 from fb2p_studio.ui.tab_about import AboutTab
 from fb2p_studio.ui.tab_convert import ConvertTab
+from fb2p_studio.ui.theme import LogColors
 
 
 class MainWindow(QMainWindow):
-    def __init__(self) -> None:
+    def __init__(self, log_colors: LogColors) -> None:
         super().__init__()
         self.setWindowTitle(f"FoxBin2Prg-Studio {__version__}")
         self.resize(940, 700)
@@ -21,7 +22,7 @@ class MainWindow(QMainWindow):
         self._settings = Settings()
 
         self._tabs = QTabWidget(self)
-        self._tab_convert = ConvertTab(self._settings)
+        self._tab_convert = ConvertTab(self._settings, log_colors)
         self._tab_about = AboutTab(self._settings)
         self._tabs.addTab(self._tab_convert, "Convertir")
         self._tabs.addTab(self._tab_about, "Acerca de")
