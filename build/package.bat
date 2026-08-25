@@ -83,8 +83,9 @@ if exist "%RELDIR%" (
 REM --- 4. Copiar payload ---------------------------------------------------
 copy /y "dist\FoxBin2Prg-Studio.exe" "%RELDIR%\" >nul || goto :err
 
-REM Los .txt vienen del template si existe; si no, los generamos vacios
+REM Los .txt / .md vienen del template si existen
 if exist "%TEMPLATE%\LEEME.txt"    copy /y "%TEMPLATE%\LEEME.txt"    "%RELDIR%\" >nul
+if exist "%TEMPLATE%\LEEME.md"     copy /y "%TEMPLATE%\LEEME.md"     "%RELDIR%\" >nul
 if exist "%TEMPLATE%\LICENCIA.txt" copy /y "%TEMPLATE%\LICENCIA.txt" "%RELDIR%\" >nul
 if exist "%TEMPLATE%\CAMBIOS.txt"  copy /y "%TEMPLATE%\CAMBIOS.txt"  "%RELDIR%\" >nul
 
