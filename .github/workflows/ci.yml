@@ -1,0 +1,55 @@
+# CI — lint + tests + build del .exe
+#
+# Corre en Windows porque el producto es Windows: PySide6 + PyInstaller onefile.
+# Los tests NO necesitan VFP9 (no ejecutan el driver, sólo serializan/parsean),
+# así que un runner limpio alcanza.
+#
+# Para moverlo a un runner propio (por ejemplo, una máquina del NAS), cambiar
+# `runs-on: windows-latest` por `runs-on: [self-hosted, windows]`. El resto del
+# workflow no cambia.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: python -m pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: python -m ruff check .
+
+      - name: Tests (pytest)
+        run: python -m pytest -q
+
+      # El icono está versionado y `tests/test_icon.py` valida que siga siendo
+      # un .ico multi-tamaño válido. No lo regeneramos acá: el PNG que emite Qt
+      # no es byte-a-byte igual entre versiones de Qt, y compararlo daría rojos
+      # falsos en un runner con otra build.
+
+      - name: Build del .exe
+        run: python -m PyInstaller --noconfirm --clean build/fb2p_studio.spec
+
+      - name: Publicar el .exe como artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FoxBin2Prg-Studio-exe
+          path: dist/FoxBin2Prg-Studio.exe
+          retention-days: 14
+          if-no-files-found: error

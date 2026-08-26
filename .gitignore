@@ -49,6 +49,11 @@ Desktop.ini
 # Sensibles / propios de la máquina
 .fb2p_studio_local.ini
 
+# Traducciones compiladas (se generan con build\i18n.bat release)
+*.qm
+
 # Paquetes de release generados (el template si se versiona)
 release/FoxBin2Prg-Studio-*/
 release/*.zip
+release/*.msi
+release/*.wixpdb

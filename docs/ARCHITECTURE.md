@@ -26,50 +26,85 @@ El CLI sólo entrega `ErrorLevel 0/1` y un CSV a stdout con mensajes localizados
 
 ### Python (`src/fb2p_studio/`)
 
-- **`core.job`**: `Job`, `Operation`, `FileResult` — dataclasses tipadas.
+- **`core.job`**: `Job`, `Operation`, `OperationOptions` y los `*Event` — dataclasses tipadas.
+- **`core.project_reader`**: lee que archivos componen un proyecto — el `.pjx` es un DBF (con sus nombres en el memo `.pjt`), el `.pj2` es texto. Replica como arma la lista FoxBin2Prg.
+- **`core.validators`**: pre-flight. Para cada archivo del proyecto dice si existe y si se convierte en esa direccion, que son las dos condiciones que FoxBin2Prg evalua en silencio.
 - **`core.discovery`**: localiza `vfp9.exe` y `foxbin2prg` (var. entorno + `QSettings` + defaults).
-- **`core.bridge`**: envuelve `QProcess`. Genera `job.json`, lanza VFP con el driver, escucha `finished()`.
+- **`core.bridge`**: envuelve `QProcess`. Genera `job.ini`, lanza VFP con el driver, escucha `finished()`.
 - **`core.ipc`**: `QFileSystemWatcher` sobre `progress.jsonl`, emite señales Qt por evento.
 - **`core.settings`**: wrapper sobre `QSettings` (ubicación: `%APPDATA%\FoxBin2Prg-Studio\`).
-- **`ui.*`**: PySide6, `QMainWindow` con `QTabWidget`.
+- **`ui.*`**: PySide6, `QMainWindow` con `QTabWidget`. Las pestanas que ejecutan jobs (Convertir, Proyecto) comparten `ui.job_runner.JobRunner` (ciclo de vida del bridge + volcado de eventos al log) y `ui.widgets.advanced_options.AdvancedOptions`.
 
 ### Driver VFP (`vfp_bridge/`)
 
-- **`fb2p_bridge.prg`**: entrypoint. Lee `job.json` de la variable de entorno `FB2P_JOB`, itera operaciones, escribe JSONL en la ruta indicada en el propio job.
+- **`fb2p_bridge.prg`**: entrypoint. Lee el `job.ini` que indica la variable de entorno `FB2P_JOB`, itera operaciones, escribe JSONL en la ruta indicada en el propio job.
 - **`fb2p_bridge.fpw`**: `SCREEN=OFF` + `COMMAND=DO fb2p_bridge.prg`.
 
 ## Protocolo IPC (JSONL)
 
 ### Job (Python → driver)
 
-Archivo `%TEMP%\fb2p_studio\<uuid>\job.json`:
+Archivo `%TEMP%\fb2p_studio_<hex>\job.ini`. **Es INI, no JSON**: el driver es VFP y parsear INI ahí son treinta líneas, mientras que parsear JSON son trescientas. El JSONL de vuelta sí es JSON porque lo consume Python.
 
-```json
-{
-  "schemaVersion": 1,
-  "foxbin2prgHome": "D:\\FenixPro\\Proyectos\\foxbin2prg",
-  "eventStream": "C:\\Users\\...\\Temp\\fb2p_studio\\<uuid>\\events.jsonl",
-  "dryRun": false,
-  "operations": [
-    {
-      "id": "op1",
-      "file": "C:\\proj\\form.scx",
-      "type": "BIN2PRG",
-      "options": {
-        "noTimestamps": 1,
-        "debug": 0,
-        "recompile": 1,
-        "backupLevels": 1,
-        "clearUniqueID": 1
-      },
-      "outputFolder": null,
-      "cfgFile": null
-    }
-  ]
-}
+```ini
+[job]
+foxbin2prghome = D:\FenixPro\Proyectos\FoxBin2Prg-Studio\bundled\foxbin2prg
+eventstream = C:\Users\...\Temp\fb2p_studio_a1b2c3d4\events.jsonl
+dryrun = 0
+
+[op:op1]
+file = C:\proj\form.scx
+type = BIN2PRG
+notimestamps = 1
+debug = 0
+recompile = 1
+backuplevels = 1
+clearuniqueid = 1
+cfgfile =
+outputfolder =
 ```
 
-Ruta del `job.json` pasa al driver por variable de entorno `FB2P_JOB`.
+`configparser` baja las claves a minúsculas al escribir; el parser del driver también, así que el protocolo es case-insensitive de los dos lados.
+
+La ruta del `job.ini` llega al driver por la variable de entorno `FB2P_JOB`.
+
+#### `type` — el `cType` de FoxBin2Prg
+
+| Valor | Significado |
+|---|---|
+| *(vacío)* | La dirección la decide la extensión del archivo. |
+| `BIN2PRG` | Binario → texto. |
+| `PRG2BIN` | Texto → binario. |
+| `*` | **Modo proyecto:** el `.pjx`/`.pj2` y todos sus archivos. La dirección la decide la extensión del proyecto. |
+| `*-` | Igual, pero **sin** el propio archivo de proyecto. |
+
+FoxBin2Prg entra al modo proyecto cuando el `cType` **empieza** con `*` y la extensión es `PJX`/`PJ2` (`Left(Evl(tcType,'0'),1) == '*'` en `foxbin2prg.prg`), y dentro decide con `If tcType <> '*-'` si convierte también el proyecto.
+
+> El driver **no** puede aplicar su recorte de guiones al modo proyecto: `sanitize_ctype()` sale temprano cuando el valor empieza con `*`, porque el recorte convertiría `*-` en `*` — es decir, incluiría el `.pjx` que el usuario pidió excluir. Hay tests que fijan esto (`tests/test_project_mode.py`).
+
+`INTERACTIVE` y `SHOWMSG` se eliminan siempre: abren diálogos que colgarían el proceso headless.
+
+#### Soporte de conversión: depende de la dirección
+
+FoxBin2Prg no convierte todo en las dos direcciones. Cada tipo de archivo tiene una clave `n_XXX_Conversion_Support` y las dos funciones de soporte piden cosas distintas:
+
+- `hasSupport_Bin2Prg()` → `n_XXX_Conversion_Support > 0`
+- `hasSupport_Prg2Bin()` → `n_XXX_Conversion_Support = 2` (para DBF acepta también `8`, *import de datos*)
+
+Con los valores por defecto:
+
+| Extensión | Soporte | Bin → Prg | Prg → Bin |
+|---|---|---|---|
+| PJX, VCX, SCX, FRX, LBX, MNX, DBC | 2 | sí | sí |
+| **DBF, FKY, MEM** | **1** | sí | **no** |
+
+Es decir: una tabla se **vuelca** a texto pero no se **reconstruye** desde él — rearmar el `.dbf` desde su dump pisaría los datos, así que hay que pedirlo explícitamente en el `.cfg`. Cuando no se cumple el soporte, FoxBin2Prg registra el archivo como no procesado (`P0`/`S0`) y **sigue sin avisar**.
+
+`core/extensions.py` replica esta tabla en `DEFAULT_SUPPORT` y `supports(path, direction)`. Es una **predicción con la configuración por defecto**: no se leen los `foxbin2prg.cfg` del árbol (con toda su herencia), así que un `.cfg` puede cambiar el resultado. La UI lo dice donde muestra el número.
+
+#### `recompile` — acepta una carpeta
+
+Además de `0`/`1`, `cRecompile` acepta un **directorio**: FoxBin2Prg hace `CD` ahí antes de recompilar y sigue recompilando (`l_Recompile = (Empty(x) Or x == '1' Or Directory(x))`). La pestaña Proyecto lo usa para recompilar desde la carpeta del proyecto en vez de la de cada archivo, que es lo que rompe las rutas relativas de los `#include`.
 
 ### Eventos (driver → Python)
 
@@ -94,7 +129,7 @@ Un JSON por línea, con `flush` implícito (cada línea es un `STRTOFILE(..., AD
 | `op_error` | `CATCH TO loEx` disparó | `opId`, `errorNo`, `message`, `lineNo`, `details` |
 | `op_done` | Después de cada `execute()` | `opId`, `returnCode`, `elapsedMs` |
 | `job_done` | Antes de `QUIT` | `okCount`, `errCount`, `elapsedMs` |
-| `driver_error` | Falla del propio driver (job.json ilegible, etc.) | `message`, `stage` |
+| `driver_error` | Falla del propio driver (job.ini ilegible, FoxBin2Prg ausente, etc.) | `message`, `stage` |
 
 ## Cancelación
 
@@ -105,5 +140,6 @@ Python escribe un archivo sentinela `<work>\\.cancel` cuando el usuario cancela.
 - **`INTERACTIVE` prohibido**: el driver nunca lo pasa; la GUI muestra sus propios diálogos.
 - **`MESSAGEBOX` bloqueante**: el driver siempre pasa `cDontShowErrors=1`.
 - **`ShowProgressbar` VFP**: `cDontShowProgress=1`.
-- **Locks de binarios**: `core.validators` chequea antes de cada `op_start`.
-- **Proyecto con archivos en otra unidad**: `core.validators` advierte antes de encolar.
+- **Archivos faltantes o no convertibles**: `core.validators` los reporta ANTES de ejecutar (la pestana Proyecto los lista y pide confirmacion si falta alguno). Es lo que FoxBin2Prg se salta sin decir nada.
+- **Locks de binarios**: NO se pre-valida. Si el binario esta abierto en VFP, la operacion falla y llega como `op_error` con el mensaje de VFP.
+- **Proyecto con archivos en otra unidad**: lo arregla FoxBin2Prg desde la v1.19.45 (bug reportado por Matt Slay); el bundle embebido es 1.21, asi que esta cubierto.

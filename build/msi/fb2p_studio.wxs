@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Instalador MSI de FoxBin2Prg-Studio (WiX 4+; probado con WiX 7).
+
+  Para que sirve: el .exe suelto alcanza para cualquiera, pero algunos equipos
+  de IT despliegan solo por MSI (GPO / Intune). Este paquete instala en
+  Program Files, deja acceso directo en el menu Inicio y entrada en
+  "Agregar o quitar programas".
+
+  Se construye con `build\msi.bat` (no invocar wix a mano: la version y las
+  rutas se pasan por -d).
+
+  ATENCION: el UpgradeCode identifica al producto de por vida. Si se cambia,
+  Windows deja de ver las versiones nuevas como actualizaciones de la vieja y
+  quedan las dos instaladas en paralelo. NO TOCAR.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <Package
+      Name="FoxBin2Prg-Studio"
+      Manufacturer="ADS Software"
+      Version="$(var.Version)"
+      UpgradeCode="630099C6-BDD4-4535-AA9B-E8D22417E13B"
+      Scope="perMachine"
+      Compressed="yes"
+      Language="1033">
+
+    <SummaryInformation
+        Description="GUI de administracion para FoxBin2Prg (VFP9)"
+        Manufacturer="ADS Software" />
+
+    <!-- Instalar encima desinstala la version anterior, sin dejar duplicados. -->
+    <MajorUpgrade
+        AllowSameVersionUpgrades="yes"
+        DowngradeErrorMessage="Ya hay una version mas nueva de FoxBin2Prg-Studio instalada." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Icono de "Agregar o quitar programas": el mismo del .exe. -->
+    <Icon Id="AppIcon" SourceFile="$(var.IconFile)" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon" />
+    <Property Id="ARPCONTACT" Value="desarrolloads@adsecuador.com" />
+    <Property Id="ARPNOREPAIR" Value="1" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="FoxBin2Prg-Studio" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="AppMenuFolder" Name="FoxBin2Prg-Studio" />
+    </StandardDirectory>
+
+    <Feature Id="Main" Title="FoxBin2Prg-Studio" Level="1">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentGroupRef Id="AppShortcuts" />
+    </Feature>
+
+  </Package>
+
+  <Fragment>
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <!-- Un unico ejecutable autocontenido: Python + Qt + FoxBin2Prg adentro. -->
+      <Component Id="MainExecutable">
+        <File Id="StudioExe" Source="$(var.ExeFile)" KeyPath="yes" />
+      </Component>
+
+      <!-- La documentacion sale del mismo template que el ZIP: una sola fuente. -->
+      <Component Id="DocLeemeTxt">
+        <File Source="$(var.DocDir)\LEEME.txt" KeyPath="yes" />
+      </Component>
+      <Component Id="DocLeemeMd">
+        <File Source="$(var.DocDir)\LEEME.md" KeyPath="yes" />
+      </Component>
+      <Component Id="DocLicencia">
+        <File Source="$(var.DocDir)\LICENCIA.txt" KeyPath="yes" />
+      </Component>
+      <Component Id="DocCambios">
+        <File Source="$(var.DocDir)\CAMBIOS.txt" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="AppShortcuts">
+      <!--
+        El acceso directo necesita un KeyPath propio. Usamos HKLM porque la
+        instalacion es perMachine y el menu Inicio es el de todos los usuarios;
+        con HKCU el validador (ICE57) protesta, con razon.
+      -->
+      <Component Id="StartMenuShortcut" Directory="AppMenuFolder" Guid="*">
+        <Shortcut Id="StudioShortcut"
+                  Name="FoxBin2Prg-Studio"
+                  Description="Conversor binario/texto para proyectos Visual FoxPro 9"
+                  Target="[INSTALLFOLDER]FoxBin2Prg-Studio.exe"
+                  WorkingDirectory="INSTALLFOLDER" />
+        <RemoveFolder Id="RemoveAppMenuFolder" Directory="AppMenuFolder" On="uninstall" />
+        <RegistryValue Root="HKLM"
+                       Key="Software\ADS Software\FoxBin2Prg-Studio"
+                       Name="Installed"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+</Wix>

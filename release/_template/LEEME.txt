@@ -23,6 +23,8 @@ REQUISITOS
   Windows 10 / 11 (64 bits).
 
   Visual FoxPro 9 SP2 (build >= 3504) instalado en la maquina.
+  Ver la seccion PRE-REQUISITO mas abajo.
+
   Rutas tipicas que la GUI autodetecta:
     - C:\Fenix\AdsFenix\Librerias\vfp9.exe
     - C:\Program Files (x86)\Microsoft Visual FoxPro 9\vfp9.exe
@@ -30,7 +32,38 @@ REQUISITOS
   Si vfp9.exe esta en otro lugar: menu Herramientas > Preferencias.
 
   Nada mas hace falta. FoxBin2Prg (FoxBin2Prg.EXE + filename_caps.exe +
-  filename_caps.cfg) ya viene embebido dentro del ejecutable.
+  filename_caps.cfg) ya viene embebido dentro del ejecutable: no hay que
+  instalarlo ni copiar ninguna carpeta. La pestana "Acerca de" lo muestra
+  como "(embebido en Studio)".
+
+  Si preferis usar otra copia de FoxBin2Prg, indica su carpeta en el menu
+  Herramientas > Preferencias (o en la variable de entorno FB2P_HOME).
+  Ahi "Acerca de" la mostrara como "(externo)".
+
+
+PRE-REQUISITO: QUE VFP9 SEA SP2 (BUILD >= 3504)
+-----------------------------------------------
+
+  FoxBin2Prg corre DENTRO de Visual FoxPro 9 y necesita el Service Pack 2.
+  Con un build anterior las conversiones fallan.
+
+  Como verificar el build. En la ventana de comandos de VFP9:
+
+      ? VERSION(4)      && 09.00.0000.3504 o superior = SP2
+
+  Tambien aparece en el log de Studio: la linea job_start trae el campo
+  vfpVersion.
+
+  Como actualizar. Si el build es menor a 3504, ejecutar el instalador
+  setup_bussinesRule.exe, que deja VFP9 en SP2. Esta disponible en:
+
+    NAS          \\192.168.0.16\Compilado_16
+
+    SharePoint   (link en una sola linea, copiarlo entero)
+    https://adssoftware.sharepoint.com/:f:/s/SOPORTE_ADS/IgDgpcrWtLgYQZsc32SzmgLRAVF8stWKYEFlzKkmYGi6FVw?e=sqfAVY
+
+  Terminada la instalacion, volver a correr ? VERSION(4) para confirmar
+  el build.
 
 
 INSTALACION

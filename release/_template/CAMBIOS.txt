@@ -24,9 +24,11 @@ VERSION 0.1.0 — 2026-08-24
     - FoxBin2Prg v1.21 embebido en el .exe (CC BY 4.0).
     - Deteccion de dark mode del sistema con paleta consistente.
     - Preview del job.ini que crece con el contenido.
+    - Icono propio en el .exe, la ventana y la barra de tareas.
 
   Requisitos externos:
-    - Solo VFP9 SP2 instalado en la maquina destino.
+    - Solo VFP9 SP2 instalado en la maquina destino (build >= 3504).
+      Si el build es menor, correr setup_bussinesRule.exe — ver LEEME.
 
 
 ================================================================================
