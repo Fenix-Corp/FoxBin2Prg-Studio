@@ -4,6 +4,9 @@
 # Los tests NO necesitan VFP9 (no ejecutan el driver, sólo serializan/parsean),
 # así que un runner limpio alcanza.
 #
+# Ramas: `dev` es donde se trabaja y `master` se actualiza por PR desde dev, asi
+# que CI corre en las dos y ademas valida los PR contra master.
+#
 # Para moverlo a un runner propio (por ejemplo, una máquina del NAS), cambiar
 # `runs-on: windows-latest` por `runs-on: [self-hosted, windows]`. El resto del
 # workflow no cambia.
@@ -12,14 +15,20 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master, dev]
   pull_request:
-    branches: [main]
+    branches: [master]
   workflow_dispatch:
 
 jobs:
   check:
     runs-on: windows-latest
+
+    env:
+      # Los tests construyen widgets (el arbol de resultados, la vista de
+      # contenido). Sin plataforma grafica explicita, Qt puede no encontrar uno
+      # utilizable en un runner y morir con "could not connect to display".
+      QT_QPA_PLATFORM: offscreen
 
     steps:
       - uses: actions/checkout@v4

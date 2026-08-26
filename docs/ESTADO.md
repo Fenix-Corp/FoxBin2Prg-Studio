@@ -2,7 +2,8 @@
 
 **Última actualización:** 2026-08-25
 **Versión actual:** `0.1.0` (empaquetada y distribuida)
-**Rama de trabajo:** `main`
+**Repositorio:** <https://github.com/Fenix-Corp/FoxBin2Prg-Studio> (privado)
+**Rama de trabajo:** `dev` — `master` se actualiza por PR desde `dev`
 
 Este documento resume la propuesta original, todo lo completado, lo que quedó pendiente y el backlog a futuro. Es la fuente de verdad para saber en qué punto está el proyecto entre sesiones.
 
@@ -274,14 +275,9 @@ link que se copia del navegador devuelve HTML y no el JSON.
 
   Para las maquinas que no ven el NAS, subir ese mismo JSON a Drive o SharePoint y pegar el link en **Preferencias → Manifiesto de versiones**. En Drive el archivo tiene que quedar accesible "para cualquiera con el link", y conviene que las notas no digan nada que no pueda ser publico.
 
-- [ ] **Pushear a la cuenta privada de GitHub.** El historial se reviso y no tiene secretos; lo unico interno son la IP del NAS y el link de SharePoint, aceptables en un repo privado (si algun dia se hiciera publico, habria que sacarlos a configuracion). El `bundled/foxbin2prg/` es redistribuible (CC BY 4.0, con atribucion). Total versionado: 1,2 MB.
+- [x] **Repositorio publicado** en <https://github.com/Fenix-Corp/FoxBin2Prg-Studio> (privado), con `master` y `dev`. El historial se reviso antes de subirlo y no tiene secretos; lo unico interno son la IP del NAS y el link de SharePoint, aceptables en un repo privado (si algun dia se hiciera publico, habria que sacarlos a configuracion). El `bundled/foxbin2prg/` es redistribuible (CC BY 4.0, con atribucion). Total versionado: 1,2 MB.
 
-  ```bash
-  git remote add origin https://github.com/<usuario>/FoxBin2Prg-Studio.git
-  git push -u origin main
-  ```
-
-  Con eso el workflow de `.github/workflows/ci.yml` empieza a correr solo en cada push. En un repo privado de cuenta Free hay 2.000 minutos/mes de Actions y los runners de Windows cuentan doble; esta corrida son ~4 minutos, asi que sobra.
+  CI dispara en push a `master` y `dev`, y en los PR hacia `master`. En un repo privado de cuenta Free hay 2.000 minutos/mes de Actions y los runners de Windows cuentan doble; esta corrida son ~4 minutos, asi que sobra.
 
 ---
 

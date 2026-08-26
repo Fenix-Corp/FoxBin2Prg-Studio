@@ -55,6 +55,9 @@ Ver [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para el protocolo IPC completo.
 
 ## Desarrollo
 
+Repositorio: <https://github.com/Fenix-Corp/FoxBin2Prg-Studio> (privado).
+**Se trabaja en `dev`**; `master` se actualiza por PR desde `dev`.
+
 ```bash
 py -3.12 -m venv .venv
 .venv\Scripts\activate
@@ -83,7 +86,7 @@ Con `--build` compila además el `.exe`; con `--fix` aplica antes los autofixes 
 
 ### CI
 
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml) corre lint + tests + build en `windows-latest` y publica el `.exe` como artifact. **El repo todavía no tiene remoto**, así que el workflow queda inerte hasta el primer `git push`. Para correrlo en una máquina propia en vez de en los runners de GitHub, cambiar `runs-on: windows-latest` por `runs-on: [self-hosted, windows]`.
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) corre lint + tests + build en `windows-latest` y publica el `.exe` como artifact. Dispara en cada push a `master` y a `dev`, y en los PR hacia `master`. Para correrlo en una máquina propia en vez de en los runners de GitHub, cambiar `runs-on: windows-latest` por `runs-on: [self-hosted, windows]`.
 
 ### Instalador MSI
 
