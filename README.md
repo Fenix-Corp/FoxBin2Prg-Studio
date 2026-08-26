@@ -10,8 +10,8 @@ MVP en construcción. Tabs previstas:
 
 | Tab | Cubre | Estado |
 |---|---|---|
-| Convertir | Un archivo o carpeta (BIN2PRG / PRG2BIN) | 🚧 MVP |
-| Proyecto | Proyecto completo (`*` / `*-`) | ✅ |
+| Convertir | Un archivo o carpeta (BIN2PRG / PRG2BIN) | ✅ |
+| Proyecto | Proyecto completo (`*` / `*-`), con pre-flight del contenido | ✅ |
 | Diff | `Fb2P_Diff.EXE` | ⏳ fase 2 |
 | Config | Templates `.cfg` y `.dbf.cfg` | ⏳ fase 2 |
 | Acerca de | Diagnóstico + `VERNO` | 🚧 MVP |
@@ -39,8 +39,9 @@ Ningún paso de la cadena es obligatorio: un override que ya no existe (un `.ini
 FoxBin2Prg-Studio/
 ├── src/fb2p_studio/           GUI Python (PySide6)
 │   ├── ui/                    Widgets y tabs
-│   ├── core/                  bridge, ipc, job, discovery, settings, updates
-│   └── resources/             Icono (.ico) + traducciones (i18n/)
+│   ├── core/                  bridge, ipc, job, discovery, settings, updates,
+│   │                          project_reader, validators
+│   └── resources/             Icono (.ico), logo ADS + traducciones (i18n/)
 ├── vfp_bridge/                Driver VFP (fb2p_bridge.prg)
 ├── build/                     PyInstaller spec + scripts (build, check, package, msi, i18n)
 ├── .github/workflows/         CI
@@ -111,6 +112,17 @@ build\i18n.bat extract
 Eso actualiza `src/fb2p_studio/resources/i18n/fb2p_studio_<lang>.ts` con las cadenas nuevas. Se traducen con Qt Linguist (`.venv\Scripts\pyside6-linguist.exe <archivo>.ts`) y se compilan con `build\i18n.bat release`. Los `.ts` se versionan; los `.qm` no (los genera el build).
 
 Para sumar un idioma, agregarlo a `IDIOMAS` en `build/i18n.bat`. En runtime, `app.py` carga el `.qm` que corresponda al locale del sistema; si no hay, la UI queda en español.
+
+### Temas
+
+Hay dos, elegibles en **Herramientas → Preferencias** y aplicables sin reiniciar:
+
+| Tema | Qué es |
+|---|---|
+| **Sistema** (por defecto) | Fusion con paleta clara u oscura según Windows. Se mimetiza con el escritorio. |
+| **ADS corporativo** | La identidad de la casa: azul `#1F3A5E`, banda superior con logo y hoja de estilo propia — la misma que el resto de las utilidades del departamento y que los PDF de `md2pdf`. |
+
+El tema ADS está portado de `UtilitiesDevelopment/shell/theme.py`; los colores viven en [`ui/theme_ads.py`](src/fb2p_studio/ui/theme_ads.py) y **están medidos, no elegidos a ojo**: [`tests/test_theme_contrast.py`](tests/test_theme_contrast.py) verifica en cada corrida que cada par texto/fondo cumpla el 4,5:1 de WCAG 2.1 AA. Si cambia la identidad corporativa, se corrige ahí y en el CSS de `md2pdf`, no en veinte widgets sueltos.
 
 ### Icono
 

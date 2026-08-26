@@ -5,6 +5,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **Árbol de resultados** (`ui/widgets/results_view.py`) — reemplaza al log lineal como vista principal de una corrida: cada operación es una fila con sus archivos colgando (Archivo · Dirección · Estado · Tiempo · Error), con filtro *sólo lo que falló* y panel de detalle del error abajo. El log sigue disponible en una pestaña al lado.
+- **Tema ADS corporativo, elegible en Preferencias** — el mismo azul #1F3A5E, la banda superior y la hoja de estilo de las demás utilidades del departamento. El tema **Sistema** (Fusion claro/oscuro) sigue siendo el de por defecto y quedó igual que antes. Se cambia sin reiniciar. Los colores del log están medidos contra su fondo y `tests/test_theme_contrast.py` verifica WCAG AA en cada corrida.
+- **Toast de aviso** (`ui/widgets/toast.py`) — el chequeo de actualización al arrancar avisa con un aviso flotante que se va solo, en vez de un modal: la lectura del manifiesto puede tardar (está en el NAS) y llega cuando la ventana ya se abrió.
 - **Pre-flight del proyecto** — la pestana Proyecto ahora **lista el contenido antes de ejecutar**: cada archivo con su tipo y que va a pasar con el (`se convierte` / `FALTA en disco` / `no convertible`, con el motivo en el tooltip). Antes esto sólo se sabia despues, leyendo el log.
   - `core/project_reader.py` lee los dos formatos: el `.pjx` es un DBF con los nombres en el memo `.pjt`; el `.pj2` es texto y hay que sacar los `.ADD(...)` de entre `*<BuildProj>` y `*</BuildProj>`, cambiandoles la extension a la de texto (que es lo que FoxBin2Prg realmente lee en esa direccion).
   - `core/validators.py` calcula las dos condiciones que FoxBin2Prg evalua en silencio: que el archivo exista y que su tipo tenga soporte en esa direccion. Cierra el `core.validators` que `ARCHITECTURE.md` prometia desde el MVP y no existia.
@@ -32,7 +35,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 - **CI** en `.github/workflows/ci.yml` — lint + tests + build del `.exe` como artifact en `windows-latest`. Inerte hasta que el repo tenga remoto.
 - **Instalador MSI** — `build/msi/fb2p_studio.wxs` + `build/msi.bat` (WiX 5). Instala en Program Files, acceso directo en menú Inicio, entrada de desinstalación, icono en "Agregar o quitar programas" y upgrade mayor sin duplicar instalaciones.
 - **i18n preparado** — las cadenas de la UI (146 a hoy) pasaron a `self.tr(...)`; `build/i18n.bat` extrae/compila los `.ts`/`.qm` y `app.py` carga la traducción del locale del sistema. El idioma fuente sigue siendo el español, así que sin `.qm` no cambia nada.
-- `tests/test_icon.py`, `tests/test_updates.py`, `tests/test_project_mode.py` y `tests/test_project_reader.py` (que fabrica `.pjx` byte a byte, DBF + memo, para documentar el formato que se soporta). La suite pasó de 6 a 102 tests.
+- `tests/test_icon.py`, `tests/test_updates.py`, `tests/test_project_mode.py` y `tests/test_project_reader.py` (que fabrica `.pjx` byte a byte, DBF + memo, para documentar el formato que se soporta). La suite pasó de 6 a 148 tests.
 
 ### Changed
 - El ciclo de vida del bridge y el volcado de eventos al log salieron de `ConvertTab` a `ui/job_runner.py`, y las opciones avanzadas a `ui/widgets/advanced_options.py`: los comparten Convertir y Proyecto en vez de existir dos veces. Verificado que la pestana Convertir muestra exactamente el mismo texto que antes.
@@ -43,6 +46,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 - Diálogo de **Preferencias**: las rutas autodetectadas se muestran como *placeholder*, no como texto del campo. Antes, abrir el diálogo y aceptar persistía la ruta de esa máquina como override.
 
 ### Fixed
+- **El detalle del error estaba vacío justo cuando hacía falta.** La mayoría de los fallos de FoxBin2Prg no son excepciones VFP: devuelve el código en `op_done` (`rc=1098`) y escribe la explicación legible en stderr. Sólo se miraba `op_error`, así que la causa quedaba enterrada en el log. Ahora se acumula stderr por operación y se muestra en la columna Error y en el panel de detalle.
 - **El soporte de conversion depende de la direccion, y no se estaba teniendo en cuenta.** `hasSupport_Bin2Prg()` pide `n_XXX_Conversion_Support > 0` pero `hasSupport_Prg2Bin()` pide `= 2`, asi que con la configuracion por defecto un `.dbf` se vuelca a `.db2` pero el `.db2` **no** se reconstruye (rearmar la tabla pisaria los datos). Studio lo daba por convertible en las dos direcciones: en la pestana Convertir, Ejecutar sobre un `.db2` no hacia nada sin explicar por que. Ahora `core/extensions.py` modela el nivel de soporte por extension y direccion, la pestana Convertir avisa antes de lanzar, y el pre-flight del proyecto lo refleja.
 - `sanitize_ctype()` del driver VFP recortaba el guion final del `cType`, convirtiendo `*-` en `*`: pedir "el proyecto sin el .pjx" habria procesado el .pjx igual, sin aviso. Ahora el modo proyecto sale temprano de la normalizacion, con tests que lo fijan.
 - Un override de ruta que ya no existe (`.ini` traído de otra máquina, carpeta movida) dejaba a Studio en `<no encontrado>` en vez de seguir buscando: `find_fb2p_home()` / `find_vfp_exe()` ahora lo ignoran y continúan la cadena hasta el FoxBin2Prg embebido.

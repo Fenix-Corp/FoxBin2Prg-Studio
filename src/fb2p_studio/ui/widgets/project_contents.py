@@ -30,6 +30,7 @@ class ProjectContentsView(QWidget):
     def __init__(self, colors: LogColors, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._colors = colors
+        self._ultimo: ProjectPreflight | None = None
 
         self._summary = QLabel()
         self._summary.setWordWrap(True)
@@ -56,18 +57,27 @@ class ProjectContentsView(QWidget):
         self.clear(self.tr("Elegí un proyecto para ver su contenido."))
 
     # ------------------------------------------------------------------ api
+    def set_colors(self, colors: LogColors) -> None:
+        """Cambio de tema en caliente: se repinta lo que haya en pantalla."""
+        self._colors = colors
+        if self._ultimo is not None:
+            self.show_preflight(self._ultimo)
+
     def clear(self, mensaje: str = "") -> None:
+        self._ultimo = None
         self._tree.clear()
         self._set_summary(mensaje, self._colors.muted)
 
     def show_error(self, mensaje: str) -> None:
         """No se pudo leer el proyecto. Es informativo: no impide ejecutar."""
+        self._ultimo = None
         self._tree.clear()
         self._set_summary(
             self.tr("No se pudo leer el contenido: {0}").format(mensaje), self._colors.warn
         )
 
     def show_preflight(self, pf: ProjectPreflight) -> None:
+        self._ultimo = pf
         self._tree.clear()
 
         for check in pf.checks:

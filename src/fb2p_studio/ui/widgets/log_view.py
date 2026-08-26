@@ -25,6 +25,7 @@ class LogView(QWidget):
         self._colors = colors
 
         self._edit = QPlainTextEdit(self)
+        self._edit.setObjectName("bitacora")  # gancho del tema ADS
         self._edit.setReadOnly(True)
         self._edit.setMaximumBlockCount(5000)
         font = QFont("Consolas", 9)
@@ -45,6 +46,10 @@ class LogView(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self._edit, 1)
         layout.addLayout(toolbar)
+
+    def set_colors(self, colors: LogColors) -> None:
+        """Cambio de tema en caliente: lo ya escrito conserva su color."""
+        self._colors = colors
 
     def append(self, text: str, severity: str = "info") -> None:
         color = {

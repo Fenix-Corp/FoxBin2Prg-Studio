@@ -50,7 +50,7 @@ Ver [ARCHITECTURE.md](ARCHITECTURE.md) para detalles del protocolo IPC.
 - **Ejecutable distribuible:** `dist/FoxBin2Prg-Studio.exe` (48 MB, onefile).
 - **Paquete listo para compartir:** `release/FoxBin2Prg-Studio-0.1.0/` con `.exe`, `LEEME.txt`, `LEEME.md`, `LICENCIA.txt`, `CAMBIOS.txt`. `release/FoxBin2Prg-Studio-0.1.0.zip` (45 MB) armado.
 - **Verificado end-to-end** con archivo real (`articulos_recalculo.sc2` de `C:\Facturas2\FenixForms\`): round-trip Prg→Bin y Bin→Prg en ~150-500 ms.
-- **Tests unitarios:** 102/102 pasando. Lint (ruff) limpio. `build\check.bat` corre las dos cosas.
+- **Tests unitarios:** 148/148 pasando. Lint (ruff) limpio. `build\check.bat` corre las dos cosas.
 
 ### Requisitos en máquina destino
 
@@ -113,9 +113,9 @@ Si el build es menor a 3504 hay que correr `setup_bussinesRule.exe` (NAS `\192.1
 
 - `release/_template/LEEME.md` con mismo contenido que `LEEME.txt`, formato Markdown (tablas, headers, code blocks).
 
-### 3.7 Iteraciones posteriores — sin commitear (working tree actual)
+### 3.7 Iteraciones posteriores (commit `9c6e095` + `915dc6b`)
 
-Se hicieron mejoras que aún no están en `git log` pero están en disco. Al commitearlas van a cerrar los pendientes que anotan:
+Mejoras de UX de rutas, icono y prerequisito SP2:
 
 | Área | Cambio | Archivos |
 |---|---|---|
@@ -126,7 +126,7 @@ Se hicieron mejoras que aún no están en `git log` pero están en disco. Al com
 | **Doc de pre-requisito VFP SP2** | Sección en `LEEME` (txt + md) y `CAMBIOS.txt` que explica cómo verificar el build (`? VERSION(4)`) y dónde bajar `setup_bussinesRule.exe`. | `release/_template/LEEME.txt`, `release/_template/LEEME.md`, `release/_template/CAMBIOS.txt` |
 | **Test de discovery fallback** | Verifica el orden de resolución cuando falla el override. | `tests/test_discovery_fallback.py` |
 
-### 3.8 Sesión DX / infraestructura — sin commitear (working tree actual)
+### 3.8 Sesión DX / infraestructura (commit `915dc6b`)
 
 Cierra toda la sección 4.3. Detalle y decisiones tomadas, en §4.3.
 
@@ -141,9 +141,9 @@ Cierra toda la sección 4.3. Detalle y decisiones tomadas, en §4.3.
 | **i18n** | 85 cadenas en `self.tr()`, extracción/compilación, carga por locale, `.qm` bundleado en el spec. | todo `ui/`, `app.py`, `build/i18n.bat`, `build/fb2p_studio.spec` |
 | **Tests** | Icono (estructura del `.ico`) y updates (versiones + manifiesto). **39 tests**, todos en verde. | `tests/test_icon.py`, `tests/test_updates.py` |
 
-**Acción pendiente inmediata:** commitear 3.7 + 3.8. Sugerencia de corte en dos commits: (a) "UX de Preferencias + icono + prerequisito SP2", (b) "DX: gate de calidad, CI, update check, MSI e i18n".
+Commiteado en `9c6e095` (aplicación) y `915dc6b` (build + documentación).
 
-### 3.9 Tab Proyecto — sin commitear (working tree actual)
+### 3.9 Tab Proyecto (commit `9c6e095`)
 
 Cierra el primer item de la seccion 4.1.
 
@@ -170,7 +170,7 @@ Cierra el primer item de la seccion 4.1.
 | `.pjx` + `*-` | rc=0. Genero los mismos **menos** `GridDetalle.pj2`. |
 | `.pj2` + `*` | rc=0. Regenero `GridDetalle.pjx/.pjt`, `artdetalle.scx/.sct`, `rptDetalle.frx/.frt`. |
 
-### 3.10 Pre-flight del proyecto — sin commitear (working tree actual)
+### 3.10 Pre-flight del proyecto (commit `9c6e095`)
 
 Resuelve el pendiente que habia quedado a la vista en 3.9: la pestana ahora sabe que contiene el proyecto **antes** de ejecutar.
 
@@ -198,15 +198,40 @@ O sea: una tabla se vuelca a texto pero NO se reconstruye desde el (rearmarla pi
 
 **Pendiente natural que sigue abierto:** el arbol de *resultados* (§4.1) — hoy el resultado de la corrida sigue saliendo como log lineal. La vista de contenido ya deja la mitad del camino hecho: mismas columnas, misma idea.
 
+### 3.11 Tema ADS, árbol de resultados y toast — sin commitear (working tree actual)
+
+Cierra la seccion 4.1 completa.
+
+| Área | Cambio | Archivos |
+|---|---|---|
+| **Tema elegible** | Dos temas: **Sistema** (Fusion claro/oscuro, el de siempre y el de por defecto) y **ADS corporativo**, portado de `UtilitiesDevelopment/shell/theme.py`. Se elige en Preferencias y se aplica sin reiniciar. | `ui/theme.py`, `ui/theme_ads.py`, `ui/widgets/corporate_header.py`, `ui/dialog_preferences.py`, `core/settings.py` |
+| **Contraste medido** | Los colores del log y del árbol se verifican contra su fondo en cada corrida (WCAG 2.1 AA). Portado de `tools/check_contrast.py`, pero como test. | `tests/test_theme_contrast.py` |
+| **Árbol de resultados** | Operación → archivos, con Estado, Tiempo y Error; filtro *sólo lo que falló*; panel de detalle. El log queda en una pestaña al lado. | `ui/widgets/results_view.py`, `ui/job_runner.py`, las dos pestañas |
+| **Toast** | Aviso flotante que se va solo, anclado abajo a la derecha. Lo usa el chequeo de actualización al arrancar. | `ui/widgets/toast.py` |
+| **Tests** | 46 casos nuevos. **148 tests** en verde. | `tests/test_results_view.py`, `tests/test_theme_contrast.py` |
+
+**El hallazgo de esta sesión:** el plan original decía "cuando `op_error` llega, abrir un panel con `Message`, `LineNo`, ...". Pero **la mayoría de los fallos de FoxBin2Prg no son excepciones VFP**. Corrompiendo un `.sc2` real y mirando qué llegaba: `execute()` devolvió `rc=1098`, no hubo `op_error`, y la explicación util viajó por **stderr**:
+
+```
+Error 1098, No se ha encontrado el marcador de fin [ENDDEFINE] de la línea 35 para el identificador [formset]
+analyzecodeblock_define_class, 11239
+```
+
+Con el diseño del plan, el panel habría quedado vacío justo en el caso más común. Ahora `JobRunner` acumula stderr por operación y se lo pasa al árbol: la columna Error muestra la línea `Error NNNN,` y el panel, el volcado completo.
+
+**Sobre el tema ADS:** la banda corporativa sólo aparece con ese tema; con el tema Sistema la ventana queda exactamente como estaba (sin banda y sin márgenes propios). El logo (`resources/ads_logo.png`) se copió de `UtilitiesDevelopment/fnxMd2Pdf/templates/`.
+
 ---
 
 ## 4. Tareas pendientes
 
-### 4.1 Prioridad alta — funcionalidad core que faltó del MVP
+### 4.1 Prioridad alta — funcionalidad core que faltó del MVP ✅ (cerrada)
 
 - [x] **Tab Proyecto** — modos `*` y `*-` sobre `.pjx`/`.pj2`. Ver §3.9 para el detalle y las trampas encontradas.
-- [ ] **Panel de árbol de resultados** — reemplazar el log lineal por un `QTreeWidget` donde cada archivo procesado sea una fila con columnas *Archivo · Dirección · Estado · Tiempo · Error*. Escala mucho mejor cuando se convierten decenas de archivos, y permite filtrar por errores.
-- [ ] **Panel de detalle de error expandible** — cuando `op_error` llega, poder abrir un panel lateral con `Message`, `LineNo`, `LineContents`, `Details` y `ErrorNo` completos. Hoy salen en el log pero mezclados.
+- [x] **Panel de árbol de resultados** — `ui/widgets/results_view.py`. Cada operación es una fila con sus archivos colgando (Archivo · Dirección · Estado · Tiempo · Error), filtro *sólo lo que falló*, y el log queda en una pestaña al lado para diagnóstico crudo.
+  - El tiempo va en la fila de la **operación**, no del archivo: FoxBin2Prg mide por operación (`op_done.elapsedMs`) y un tiempo por archivo sería inventado.
+- [x] **Panel de detalle de error** — abajo del árbol, aparece al elegir una fila con problema y se esconde si no hay nada que mostrar.
+  - **Corregido de paso un supuesto equivocado del plan original:** el detalle no podía salir sólo de `op_error`, porque *la mayoría de los errores no son excepciones*. Ante un `.sc2` mal formado, `execute()` devuelve `rc=1098` y manda la explicación legible a **stderr** (`Error 1098, No se ha encontrado el marcador de fin [ENDDEFINE] de la línea 35...`). El `JobRunner` ahora acumula stderr por operación y se lo pasa al árbol, así la columna Error trae el motivo y el panel el volcado completo. Descubierto corrompiendo un archivo real y mirando qué llegaba.
 
 ### 4.2 Prioridad media — funcionalidad adicional prevista
 

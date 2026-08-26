@@ -10,6 +10,7 @@ from PySide6.QtWidgets import QApplication
 
 from fb2p_studio import __version__
 from fb2p_studio.core import discovery
+from fb2p_studio.core.settings import Settings
 from fb2p_studio.ui import theme
 from fb2p_studio.ui.main_window import MainWindow
 
@@ -72,7 +73,9 @@ def run(argv: list[str]) -> int:
     app = QApplication(argv)
     app.setWindowIcon(_app_icon())
     translator = _install_translator(app)  # noqa: F841 — mantiene viva la referencia
-    log_colors = theme.apply(app)
+
+    settings = Settings()
+    log_colors = theme.apply(app, settings.theme)
     window = MainWindow(log_colors=log_colors)
     window.show()
     return app.exec()

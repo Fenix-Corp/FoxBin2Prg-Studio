@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QRadioButton,
     QSplitter,
+    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -32,6 +33,7 @@ from fb2p_studio.ui.widgets.advanced_options import AdvancedOptions
 from fb2p_studio.ui.widgets.command_preview import CommandPreview
 from fb2p_studio.ui.widgets.log_view import LogView
 from fb2p_studio.ui.widgets.path_picker import PathPicker
+from fb2p_studio.ui.widgets.results_view import ResultsView
 
 
 class ConvertTab(QWidget):
@@ -72,6 +74,7 @@ class ConvertTab(QWidget):
         # --- preview + botones ---
         self._preview = CommandPreview()
         self._btn_run = QPushButton(self.tr("Ejecutar"))
+        self._btn_run.setObjectName("accionPrincipal")  # lo destaca el tema ADS
         self._btn_run.clicked.connect(self._run)
         self._btn_cancel = QPushButton(self.tr("Cancelar"))
         self._btn_cancel.setEnabled(False)
@@ -83,7 +86,13 @@ class ConvertTab(QWidget):
 
         # --- log + runner ---
         self._log = LogView(log_colors)
-        self._runner = JobRunner(self._log, self)
+        self._results = ResultsView(log_colors)
+        # Resultados primero: es lo que se mira. El log queda al lado para
+        # diagnosticar (stdout/stderr de VFP, eventos crudos).
+        self._salida = QTabWidget()
+        self._salida.addTab(self._results, self.tr("Resultados"))
+        self._salida.addTab(self._log, self.tr("Log"))
+        self._runner = JobRunner(self._log, self, self._results)
         self._btn_cancel.clicked.connect(self._runner.cancel)
         self._runner.started.connect(lambda: self._set_running(True))
         self._runner.finished.connect(lambda: self._set_running(False))
@@ -99,7 +108,7 @@ class ConvertTab(QWidget):
 
         splitter = QSplitter(Qt.Orientation.Vertical)
         splitter.addWidget(top_widget)
-        splitter.addWidget(self._log)
+        splitter.addWidget(self._salida)
         splitter.setStretchFactor(0, 3)
         splitter.setStretchFactor(1, 2)
 
@@ -109,6 +118,11 @@ class ConvertTab(QWidget):
         self._refresh_preview()
 
     # ---------------------------------------------------------------- helpers
+    def set_log_colors(self, colors: LogColors) -> None:
+        """Cambio de tema en caliente (lo llama `MainWindow`)."""
+        self._log.set_colors(colors)
+        self._results.set_colors(colors)
+
     @staticmethod
     def _wrap(layout) -> QWidget:
         w = QWidget()

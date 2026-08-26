@@ -29,6 +29,16 @@ class Settings:
     def fb2p_home(self, value: str) -> None:
         self._s.setValue("paths/fb2p_home", value)
 
+    # --- apariencia ---
+    @property
+    def theme(self) -> str:
+        """Id del tema. Vacio = el de siempre (ver `ui.theme.DEFAULT`)."""
+        return str(self._s.value("ui/theme", "", type=str))
+
+    @theme.setter
+    def theme(self, value: str) -> None:
+        self._s.setValue("ui/theme", value)
+
     # --- actualizaciones ---
     @property
     def update_manifest(self) -> str:
