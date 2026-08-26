@@ -10,6 +10,8 @@ import pytest
 from fb2p_studio.core.updates import (
     UpdateInfo,
     is_newer,
+    is_url,
+    normalize_source,
     parse_manifest,
     parse_version,
     read_manifest,
@@ -93,3 +95,56 @@ def test_read_manifest_inexistente_es_oserror(tmp_path: Path) -> None:
     """El NAS caido o la ruta mal escrita dan OSError, no ValueError."""
     with pytest.raises(OSError):
         read_manifest(tmp_path / "no-existe.json")
+
+
+# --------------------------------------------------------------------- origenes
+@pytest.mark.parametrize(
+    ("origen", "es_url"),
+    [
+        ("https://drive.google.com/uc?export=download&id=abc", True),
+        ("http://interno/latest.json", True),
+        ("HTTPS://MAYUSCULAS/x.json", True),
+        (r"\\192.168.0.16\Compilado_16\FoxBin2Prg-Studio\latest.json", False),
+        (r"C:\local\latest.json", False),
+        ("", False),
+    ],
+)
+def test_is_url(origen: str, es_url: bool) -> None:
+    assert is_url(origen) is es_url
+
+
+@pytest.mark.parametrize(
+    "compartido",
+    [
+        "https://drive.google.com/file/d/1A2b3C4d5E6f7G8h9I/view?usp=sharing",
+        "https://drive.google.com/open?id=1A2b3C4d5E6f7G8h9I",
+        "https://drive.google.com/uc?id=1A2b3C4d5E6f7G8h9I",
+    ],
+)
+def test_los_links_de_drive_se_vuelven_descarga_directa(compartido: str) -> None:
+    """El link que se copia del navegador devuelve HTML, no el JSON."""
+    assert (
+        normalize_source(compartido)
+        == "https://drive.google.com/uc?export=download&id=1A2b3C4d5E6f7G8h9I"
+    )
+
+
+def test_sharepoint_recibe_el_download() -> None:
+    url = "https://adssoftware.sharepoint.com/:u:/s/SOPORTE_ADS/Abc123?e=xyz"
+    assert normalize_source(url).endswith("&download=1")
+
+
+def test_sharepoint_no_se_duplica() -> None:
+    url = "https://adssoftware.sharepoint.com/x/latest.json?download=1"
+    assert normalize_source(url) == url
+
+
+@pytest.mark.parametrize(
+    "origen",
+    [
+        r"\\192.168.0.16\Compilado_16\latest.json",
+        "https://interno.ads/latest.json",
+    ],
+)
+def test_lo_que_no_reconoce_lo_deja_igual(origen: str) -> None:
+    assert normalize_source(origen) == origen

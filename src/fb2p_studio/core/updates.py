@@ -3,9 +3,14 @@
 No hay auto-update: Studio sólo avisa. Bajar e instalar lo hace la persona,
 copiando el .exe nuevo — coherente con que la app no tiene instalador.
 
-**El manifiesto** es un JSON en una carpeta de red (por defecto, la misma del
-NAS donde vive el resto del compilado). No hace falta servidor: leer un archivo
-por SMB alcanza, y la carpeta ya existe.
+**El manifiesto** es un JSON. Por defecto vive en la misma carpeta del NAS que
+el resto del compilado: no hace falta servidor, leer un archivo por SMB alcanza
+y la carpeta ya existe.
+
+Tambien acepta una **URL https**, para las maquinas que no ven el NAS (una
+laptop en un cliente). Los links de compartir de Google Drive y SharePoint se
+convierten solos a su forma de descarga directa (`normalize_source`), porque el
+link que se copia del navegador devuelve una pagina HTML y no el JSON.
 
     {
       "version": "0.2.0",
@@ -23,13 +28,30 @@ from __future__ import annotations
 
 import json
 import re
+import urllib.error
+import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 
 from PySide6.QtCore import QObject, QRunnable, QThreadPool, Signal
 
-#: Ubicacion por defecto del manifiesto. Se puede cambiar en Preferencias.
+#: Ubicacion por defecto del manifiesto. Se puede cambiar en Preferencias, y
+#: admite tanto una carpeta de red como una URL https.
 DEFAULT_MANIFEST = r"\\192.168.0.16\Compilado_16\FoxBin2Prg-Studio\latest.json"
+
+#: `https://drive.google.com/file/d/<ID>/view?usp=sharing` es lo que se copia
+#: del navegador; el ID es lo unico que sirve para armar la descarga directa.
+_RE_DRIVE = re.compile(
+    r"drive\.google\.com/(?:file/d/|open\?id=|uc\?[^\s]*id=)(?P<id>[\w-]{10,})"
+)
+
+#: Techo de espera de la red. Corto a proposito: esto corre al arrancar y no
+#: tiene que hacerse notar aunque el servidor no conteste.
+TIMEOUT_HTTP = 12.0
+
+#: Un manifiesto son unos cientos de bytes. Pasado esto, lo que llego no es un
+#: manifiesto (tipicamente, la pagina del visor de Drive o un login).
+_MAX_BYTES = 64 * 1024
 
 
 @dataclass(slots=True, frozen=True)
@@ -86,12 +108,70 @@ def parse_manifest(raw: str) -> UpdateInfo:
     )
 
 
+def is_url(origen: str) -> bool:
+    """Si el manifiesto esta en la web en vez de en una carpeta."""
+    return origen.strip().lower().startswith(("http://", "https://"))
+
+
+def normalize_source(origen: str) -> str:
+    """Adapta links de compartir conocidos a su forma de descarga directa.
+
+    Un link de Google Drive copiado del navegador (`.../file/d/<ID>/view`)
+    devuelve una pagina HTML, no el JSON. El de descarga directa es
+    `uc?export=download&id=<ID>`. Se convierte aca para que nadie tenga que
+    acordarse del formato al configurarlo.
+    """
+    origen = origen.strip()
+    m = _RE_DRIVE.search(origen)
+    if m:
+        return f"https://drive.google.com/uc?export=download&id={m.group('id')}"
+    if "sharepoint.com" in origen.lower() and "download=1" not in origen.lower():
+        # SharePoint sirve el archivo con ?download=1; sin eso devuelve el visor.
+        separador = "&" if "?" in origen else "?"
+        return f"{origen}{separador}download=1"
+    return origen
+
+
 def read_manifest(manifest_path: str | Path) -> UpdateInfo:
-    """Lee y parsea el manifiesto. Lanza `OSError` o `ValueError`.
+    """Lee y parsea el manifiesto, este en una carpeta o en la web.
+
+    Lanza `OSError` si no se pudo traer (NAS caido, sin red, 404) y
+    `ValueError` si lo que llego no es un manifiesto valido.
 
     Bloqueante: no llamarla desde el hilo de la UI (usar `UpdateChecker`).
     """
-    return parse_manifest(Path(manifest_path).read_text(encoding="utf-8"))
+    origen = str(manifest_path)
+    crudo = _fetch_url(origen) if is_url(origen) else Path(origen).read_text(encoding="utf-8")
+    return parse_manifest(crudo)
+
+
+def _fetch_url(url: str) -> str:
+    """Trae el manifiesto por HTTP. Los errores salen como `OSError`.
+
+    `urllib` ya levanta `URLError`/`HTTPError`, que son `OSError`, asi que el
+    llamador no distingue entre "el NAS no responde" y "el servidor devolvio
+    404": las dos cosas se reportan igual.
+    """
+    peticion = urllib.request.Request(  # noqa: S310 — el esquema se valido en is_url()
+        normalize_source(url),
+        headers={"User-Agent": "FoxBin2Prg-Studio"},
+    )
+    try:
+        with urllib.request.urlopen(peticion, timeout=TIMEOUT_HTTP) as respuesta:  # noqa: S310
+            datos = respuesta.read(_MAX_BYTES + 1)
+    except urllib.error.HTTPError as e:
+        raise OSError(f"el servidor respondio {e.code} {e.reason}") from e
+    except urllib.error.URLError as e:
+        raise OSError(f"no se pudo conectar: {e.reason}") from e
+
+    if len(datos) > _MAX_BYTES:
+        # Casi siempre significa que la URL devolvio una pagina HTML (un visor,
+        # un login) en vez del JSON. Decirlo asi ahorra media hora de confusion.
+        raise ValueError(
+            "lo que devolvio la URL no parece un manifiesto: es demasiado grande. "
+            "¿Es un link de descarga directa?"
+        )
+    return datos.decode("utf-8", errors="replace")
 
 
 class UpdateChecker(QObject):

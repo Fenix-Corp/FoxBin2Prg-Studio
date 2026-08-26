@@ -252,26 +252,36 @@ Con el diseño del plan, el panel habría quedado vacío justo en el caso más c
   - **WiX fijado en la versión 5 a propósito:** de la 6 en adelante hay que aceptar la EULA del *Open Source Maintenance Fee*, que para uso comercial es paga. La 5 es libre y usa el mismo esquema.
 - [x] **Localización** — las 85 cadenas de la UI pasaron a `self.tr(...)`; `build/i18n.bat` extrae y compila; `app.py` carga el `.qm` del locale del sistema. El idioma fuente sigue siendo el español: sin traducir nada, la app no cambia (verificado comparando las 79 cadenas que la UI muestra, antes y después: idénticas). El `.ts` de inglés está generado y sin traducir, listo para Qt Linguist.
 
-### 4.5 Acciones operativas pendientes (no son código)
+### 4.5 Publicacion y remoto
 
-- [ ] **Publicar el manifiesto de versiones en el NAS.** Crear `\\192.168.0.16\Compilado_16\FoxBin2Prg-Studio\latest.json` con este contenido (y actualizarlo en cada release):
+**Decidido:** el manifiesto sigue por defecto en el NAS, y el lector ahora acepta
+tambien una **URL https**, asi que apuntarlo a Google Drive o SharePoint es
+configuracion, no codigo. Los links de compartir de los dos servicios se
+convierten solos a su forma de descarga directa (`normalize_source`), porque el
+link que se copia del navegador devuelve HTML y no el JSON.
+
+- [ ] **Publicar el manifiesto.** Crear `\192.168.0.16\Compilado_16\FoxBin2Prg-Studio\latest.json` y actualizarlo en cada release:
 
   ```json
   {
     "version": "0.1.0",
-    "paquete": "\\\\192.168.0.16\\Compilado_16\\FoxBin2Prg-Studio\\FoxBin2Prg-Studio-0.1.0.zip",
+    "paquete": "\\192.168.0.16\Compilado_16\FoxBin2Prg-Studio\FoxBin2Prg-Studio-0.1.0.zip",
     "notas": "Primera version MVP."
   }
   ```
 
-  Mientras el archivo no exista, el chequeo al arrancar falla en silencio (por diseño) y el manual avisa que no pudo leerlo. No se creó desde la sesión: es una carpeta compartida del equipo y escribir ahí es decisión del usuario.
-- [ ] **Definir si el repo va a tener remoto** (GitHub privado, o Git interno). Sin eso, CI no corre en ningún lado.
+  Mientras no exista, el chequeo al arrancar falla en silencio (por diseno) y el manual avisa que no pudo leerlo. No se creo desde la sesion: es una carpeta compartida del equipo y escribir ahi es decision del usuario.
 
-### 4.4 Cerradas / descartadas explícitamente
+  Para las maquinas que no ven el NAS, subir ese mismo JSON a Drive o SharePoint y pegar el link en **Preferencias → Manifiesto de versiones**. En Drive el archivo tiene que quedar accesible "para cualquiera con el link", y conviene que las notas no digan nada que no pueda ser publico.
 
-- ❌ **VFP9 runtime redistribuible embebido.** Discutido: la máquina destino ya tiene VFP9 (son devs VFP). Complicaría el build y no aporta.
-- ❌ **Ejecutar FoxBin2Prg vía CLI (`FoxBin2Prg.EXE ...`).** Descartado por el usuario en la fase de diseño — el CLI sólo devuelve ErrorLevel 0/1. Todo el valor de Studio pasa por Object API.
-- ❌ **COM Automation (`VisualFoxPro.Application` como OLE server).** Descartado por sobre-ingeniería vs. driver PRG + IPC JSONL.
+- [ ] **Pushear a la cuenta privada de GitHub.** El historial se reviso y no tiene secretos; lo unico interno son la IP del NAS y el link de SharePoint, aceptables en un repo privado (si algun dia se hiciera publico, habria que sacarlos a configuracion). El `bundled/foxbin2prg/` es redistribuible (CC BY 4.0, con atribucion). Total versionado: 1,2 MB.
+
+  ```bash
+  git remote add origin https://github.com/<usuario>/FoxBin2Prg-Studio.git
+  git push -u origin main
+  ```
+
+  Con eso el workflow de `.github/workflows/ci.yml` empieza a correr solo en cada push. En un repo privado de cuenta Free hay 2.000 minutos/mes de Actions y los runners de Windows cuentan doble; esta corrida son ~4 minutos, asi que sobra.
 
 ---
 

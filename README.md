@@ -113,6 +113,19 @@ Eso actualiza `src/fb2p_studio/resources/i18n/fb2p_studio_<lang>.ts` con las cad
 
 Para sumar un idioma, agregarlo a `IDIOMAS` en `build/i18n.bat`. En runtime, `app.py` carga el `.qm` que corresponda al locale del sistema; si no hay, la UI queda en español.
 
+### Aviso de versión nueva
+
+Studio lee un manifiesto JSON al arrancar y avisa con un toast si hay una versión más nueva. **Sólo avisa**: no descarga ni instala nada.
+
+El origen se configura en **Herramientas → Preferencias** y admite las dos formas:
+
+| Origen | Ejemplo |
+|---|---|
+| Carpeta de red (por defecto) | `\192.168.0.16\Compilado_16\FoxBin2Prg-Studio\latest.json` |
+| URL https | un link de Google Drive o SharePoint |
+
+Los links de compartir de Drive y SharePoint se convierten solos a su forma de descarga directa: el link que se copia del navegador devuelve una página HTML, no el JSON. La lectura corre fuera del hilo de la UI y con timeout, así que un NAS caído o sin red no demora el arranque.
+
 ### Temas
 
 Hay dos, elegibles en **Herramientas → Preferencias** y aplicables sin reiniciar:
