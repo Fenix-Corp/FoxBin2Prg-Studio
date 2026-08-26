@@ -28,13 +28,13 @@ class CommandPreview(QWidget):
         font = QFont("Consolas", 9)
         font.setStyleHint(QFont.StyleHint.Monospace)
         self._edit.setFont(font)
-        self._edit.setPlaceholderText("Vista previa del job.ini que se enviara al bridge VFP...")
+        self._edit.setPlaceholderText(self.tr("Vista previa del job.ini que se enviara al bridge VFP..."))
         self._edit.setObjectName("commandPreview")
 
         # Altura minima al inicio (placeholder + margen)
         self._apply_height(self._MIN_LINES)
 
-        btn_copy = QPushButton("Copiar", self)
+        btn_copy = QPushButton(self.tr("Copiar"), self)
         btn_copy.clicked.connect(self._copy)
 
         toolbar = QHBoxLayout()

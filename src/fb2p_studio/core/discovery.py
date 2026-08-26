@@ -1,9 +1,13 @@
 """Localiza vfp9.exe, FoxBin2Prg y el driver VFP en disco.
 
 Orden de resolucion:
-1. Ruta explicita pasada por el llamador (Preferencias).
+1. Ruta explicita pasada por el llamador (Preferencias), si existe.
 2. Variables de entorno (`VFP_EXE`, `FB2P_HOME`).
-3. Ubicaciones tipicas conocidas.
+3. FoxBin2Prg: la copia embebida en el propio Studio.
+4. Ubicaciones tipicas conocidas.
+
+Ningun paso es obligatorio: si el de arriba no da, se sigue con el
+siguiente. Un override viejo o roto no deja a la app sin herramienta.
 """
 
 from __future__ import annotations
@@ -25,17 +29,26 @@ _FB2P_TYPICAL = [
 ]
 
 
-def _bundled_fb2p_dir() -> Path | None:
+def _frozen_base() -> Path | None:
+    """Raiz donde PyInstaller (onefile) extrae los datos, o None si corre desde fuente."""
+    if getattr(sys, "frozen", False):
+        return Path(getattr(sys, "_MEIPASS", Path(sys.executable).parent))
+    return None
+
+
+def _repo_root() -> Path:
+    """Raiz del repo en desarrollo (subiendo desde src/fb2p_studio/core/)."""
+    return Path(__file__).resolve().parents[3]
+
+
+def bundled_fb2p_dir() -> Path | None:
     """Ubicacion del FoxBin2Prg embebido.
 
     En dev: `<repo>/bundled/foxbin2prg/`.
     Empaquetado (PyInstaller onefile): `sys._MEIPASS/bundled/foxbin2prg/`.
     """
-    if getattr(sys, "frozen", False):
-        base = Path(getattr(sys, "_MEIPASS", Path(sys.executable).parent))
-        candidate = base / "bundled" / "foxbin2prg"
-    else:
-        candidate = Path(__file__).resolve().parents[3] / "bundled" / "foxbin2prg"
+    base = _frozen_base() or _repo_root()
+    candidate = base / "bundled" / "foxbin2prg"
     return candidate if _has_fb2p(candidate) else None
 
 
@@ -55,9 +68,13 @@ def _first_existing(candidates: list[str | Path]) -> Path | None:
 
 
 def find_vfp_exe(override: str | os.PathLike | None = None) -> Path | None:
-    if override:
-        p = Path(override)
-        return p if p.exists() else None
+    """Orden: override -> VFP_EXE -> rutas tipicas.
+
+    Un override que ya no existe (por ejemplo, un .ini copiado de otra
+    maquina) no corta la busqueda: se ignora y se sigue con el resto.
+    """
+    if override and Path(override).exists():
+        return Path(override)
     env = os.environ.get("VFP_EXE")
     if env and Path(env).exists():
         return Path(env)
@@ -67,24 +84,35 @@ def find_vfp_exe(override: str | os.PathLike | None = None) -> Path | None:
 def find_fb2p_home(override: str | os.PathLike | None = None) -> Path | None:
     """Devuelve la carpeta que contiene FoxBin2Prg.EXE o .FXP.
 
-    Orden: override -> FB2P_HOME -> rutas tipicas -> FoxBin2Prg embebido.
+    Orden: override -> FB2P_HOME -> FoxBin2Prg embebido -> rutas tipicas.
+
+    El embebido va ANTES que las rutas tipicas a proposito: es la version
+    que Studio trae y con la que se probo. Un `C:\\FoxBin2Prg` viejo en la
+    maquina de un usuario no debe ganarle en silencio. Para usar otra copia
+    (un clon de desarrollo, por ejemplo) hay que pedirlo explicitamente por
+    Preferencias o `FB2P_HOME`, y la pestana Acerca de lo muestra.
+
+    Un override que ya no existe (por ejemplo, un .ini copiado de otra
+    maquina, o una carpeta que se movio) no corta la busqueda: se ignora
+    y se sigue con el resto. Asi el .exe distribuido nunca queda sin
+    FoxBin2Prg por una preferencia vieja.
     """
-    if override:
-        p = Path(override)
-        if _has_fb2p(p):
-            return p
-        return None
+    if override and _has_fb2p(Path(override)):
+        return Path(override)
     env = os.environ.get("FB2P_HOME")
     if env:
         p = Path(env)
         if _has_fb2p(p):
             return p
+    bundled = bundled_fb2p_dir()
+    if bundled is not None:
+        return bundled
+    # Sin bundle (corriendo desde fuente sin bundled/): rutas conocidas
     for cand in _FB2P_TYPICAL:
         p = Path(cand)
         if _has_fb2p(p):
             return p
-    # Ultimo fallback: el FoxBin2Prg que empaqueta el propio Studio
-    return _bundled_fb2p_dir()
+    return None
 
 
 def _has_fb2p(folder: Path) -> bool:
@@ -99,11 +127,25 @@ def bridge_dir() -> Path:
     En desarrollo: `<repo>/vfp_bridge/`.
     Empaquetado (PyInstaller onefile): `sys._MEIPASS/vfp_bridge/`.
     """
-    if getattr(sys, "frozen", False):
-        base = Path(getattr(sys, "_MEIPASS", Path(sys.executable).parent))
-        return base / "vfp_bridge"
-    # dev: subir desde src/fb2p_studio/core/ hasta repo root
-    return Path(__file__).resolve().parents[3] / "vfp_bridge"
+    return (_frozen_base() or _repo_root()) / "vfp_bridge"
+
+
+def resources_dir() -> Path:
+    """Ubicacion de los recursos de la app (icono, etc).
+
+    En desarrollo: `src/fb2p_studio/resources/`.
+    Empaquetado (PyInstaller onefile): `sys._MEIPASS/fb2p_studio/resources/`.
+    """
+    base = _frozen_base()
+    if base is not None:
+        return base / "fb2p_studio" / "resources"
+    return Path(__file__).resolve().parents[1] / "resources"
+
+
+def app_icon_path() -> Path | None:
+    """Ruta al .ico de la app, o None si falta (se genera con build/make_icon.py)."""
+    candidate = resources_dir() / "fb2p_studio.ico"
+    return candidate if candidate.is_file() else None
 
 
 def resolve(

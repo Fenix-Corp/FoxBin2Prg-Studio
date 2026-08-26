@@ -31,9 +31,9 @@ class LogView(QWidget):
         font.setStyleHint(QFont.StyleHint.Monospace)
         self._edit.setFont(font)
 
-        btn_clear = QPushButton("Limpiar", self)
+        btn_clear = QPushButton(self.tr("Limpiar"), self)
         btn_clear.clicked.connect(self._edit.clear)
-        btn_save = QPushButton("Guardar...", self)
+        btn_save = QPushButton(self.tr("Guardar..."), self)
         btn_save.clicked.connect(self._save)
 
         toolbar = QHBoxLayout()
@@ -64,7 +64,9 @@ class LogView(QWidget):
         self._edit.ensureCursorVisible()
 
     def _save(self) -> None:
-        path, _ = QFileDialog.getSaveFileName(self, "Guardar log", "fb2p_studio.log", "Log (*.log);;Todos (*.*)")
+        path, _ = QFileDialog.getSaveFileName(
+            self, self.tr("Guardar log"), "fb2p_studio.log", self.tr("Log (*.log);;Todos (*.*)")
+        )
         if path:
             with open(path, "w", encoding="utf-8") as f:
                 f.write(self._edit.toPlainText())

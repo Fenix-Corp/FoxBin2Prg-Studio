@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
+    QCheckBox,
     QDialog,
     QDialogButtonBox,
     QFormLayout,
+    QFrame,
     QLabel,
     QVBoxLayout,
     QWidget,
@@ -13,32 +16,77 @@ from PySide6.QtWidgets import (
 
 from fb2p_studio.core.discovery import find_fb2p_home, find_vfp_exe
 from fb2p_studio.core.settings import Settings
+from fb2p_studio.core.updates import DEFAULT_MANIFEST
 from fb2p_studio.ui.widgets.path_picker import PathPicker
+
+
+def _auto_hint(detected: object | None, missing: str) -> str:
+    """Texto del placeholder: que se va a usar si el campo queda vacio."""
+    return f"(auto) {detected}" if detected else f"(auto) {missing}"
+
+
+def _separador() -> QFrame:
+    linea = QFrame()
+    linea.setFrameShape(QFrame.Shape.HLine)
+    linea.setFrameShadow(QFrame.Shadow.Sunken)
+    return linea
 
 
 class PreferencesDialog(QDialog):
     def __init__(self, settings: Settings, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self.setWindowTitle("Preferencias — FoxBin2Prg-Studio")
+        self.setWindowTitle(self.tr("Preferencias — FoxBin2Prg-Studio"))
         self.setMinimumWidth(560)
         self._settings = settings
 
-        self._vfp = PathPicker(mode="file", placeholder="C:\\...\\vfp9.exe", file_filter="vfp9.exe (vfp9.exe);;Todos (*.*)")
-        self._fb2p = PathPicker(mode="dir", placeholder="Carpeta con FoxBin2Prg.EXE / .FXP")
+        self._vfp = PathPicker(
+            mode="file",
+            placeholder="C:\\...\\vfp9.exe",
+            file_filter=self.tr("vfp9.exe (vfp9.exe);;Todos (*.*)"),
+        )
+        self._fb2p = PathPicker(
+            mode="dir", placeholder=self.tr("Carpeta con FoxBin2Prg.EXE / .FXP")
+        )
 
-        cur_vfp = settings.vfp_exe or (str(find_vfp_exe()) if find_vfp_exe() else "")
-        cur_fb2p = settings.fb2p_home or (str(find_fb2p_home()) if find_fb2p_home() else "")
-        self._vfp.set_value(cur_vfp)
-        self._fb2p.set_value(cur_fb2p)
+        # Los campos muestran SOLO el override guardado. Lo autodetectado va
+        # como placeholder: si se escribiera como texto, un OK lo convertiria
+        # en override y la ruta de esta maquina quedaria clavada en el .ini
+        # (mortal si ese .ini viaja a otra maquina).
+        self._vfp.set_value(settings.vfp_exe)
+        self._fb2p.set_value(settings.fb2p_home)
+        self._vfp.set_placeholder(_auto_hint(find_vfp_exe(), self.tr("no se encontro vfp9.exe")))
+        self._fb2p.set_placeholder(
+            _auto_hint(find_fb2p_home(), self.tr("no se encontro FoxBin2Prg"))
+        )
+
+        self._manifest = PathPicker(
+            mode="file",
+            placeholder=self.tr("(por defecto) {0}").format(DEFAULT_MANIFEST),
+            file_filter=self.tr("Manifiesto (*.json);;Todos (*.*)"),
+        )
+        self._manifest.set_value(settings.update_manifest)
+        self._chk_updates = QCheckBox(self.tr("Buscar actualizaciones al arrancar"))
+        self._chk_updates.setChecked(settings.check_updates_on_start)
 
         form = QFormLayout()
-        form.addRow("vfp9.exe:", self._vfp)
-        form.addRow("FoxBin2Prg (carpeta):", self._fb2p)
+        form.addRow(self.tr("vfp9.exe:"), self._vfp)
+        form.addRow(self.tr("FoxBin2Prg (carpeta):"), self._fb2p)
+        form.addRow(_separador())
+        form.addRow(self.tr("Manifiesto de versiones:"), self._manifest)
+        form.addRow("", self._chk_updates)
 
         hint = QLabel(
-            "El valor detectado por defecto proviene de las variables VFP_EXE / FB2P_HOME "
-            "o de rutas tipicas. Un override aqui se persiste en QSettings."
+            self.tr(
+                "Dejar un campo <b>vacio</b> = autodeteccion (lo que muestra el texto gris): "
+                "variables VFP_EXE / FB2P_HOME, rutas tipicas y, para FoxBin2Prg, el que "
+                "viene embebido en el propio Studio.<br>"
+                "Escribir una ruta la fija como override y la persiste en QSettings. "
+                "Si mas adelante esa ruta no existe, se ignora y se vuelve a la autodeteccion.<br><br>"
+                "El <b>manifiesto de versiones</b> es un JSON en la red que dice cual es la "
+                "ultima version publicada. Studio sólo avisa: no descarga ni instala nada."
+            )
         )
+        hint.setTextFormat(Qt.TextFormat.RichText)
         hint.setWordWrap(True)
         hint.setStyleSheet("color: #666;")
 
@@ -54,4 +102,6 @@ class PreferencesDialog(QDialog):
     def _accept(self) -> None:
         self._settings.vfp_exe = self._vfp.value()
         self._settings.fb2p_home = self._fb2p.value()
+        self._settings.update_manifest = self._manifest.value()
+        self._settings.check_updates_on_start = self._chk_updates.isChecked()
         self.accept()

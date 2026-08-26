@@ -345,9 +345,19 @@ ENDFUNC
 FUNCTION sanitize_ctype
     * Normaliza el cType removiendo INTERACTIVE (bloquea con dialogo) y
     * SHOWMSG (bloquea con MessageBox al finalizar).
+    *
+    * Modo proyecto: FoxBin2Prg entra al modo 'todo el proyecto' cuando el
+    * cType EMPIEZA con '*' y el archivo es un .PJX/.PJ2 (la direccion la
+    * decide la extension). '*' incluye el propio archivo de proyecto,
+    * '*-' lo excluye. Se devuelve el prefijo tal cual y se sale temprano:
+    * el recorte de guiones de mas abajo convertiria '*-' en '*', que es
+    * exactamente lo contrario de lo pedido.
     LPARAMETERS tc
     LOCAL lc
     lc = UPPER(ALLTRIM(nvs(tc)))
+    IF LEFT(lc, 1) == '*'
+        RETURN IIF(LEFT(lc, 2) == '*-', '*-', '*')
+    ENDIF
     lc = STRTRAN(lc, "INTERACTIVE", "")
     lc = STRTRAN(lc, "SHOWMSG", "")
     DO WHILE "--" $ lc

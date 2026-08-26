@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Signal
 from PySide6.QtGui import QDragEnterEvent, QDropEvent
 from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLineEdit, QPushButton, QWidget
 
@@ -51,12 +51,19 @@ class PathPicker(QWidget):
     def set_value(self, path: str) -> None:
         self._edit.setText(path)
 
+    def set_placeholder(self, text: str) -> None:
+        self._edit.setPlaceholderText(text)
+
     # ------------------------------------------------------------------ pick
     def _pick(self) -> None:
         if self._mode == "dir":
-            chosen = QFileDialog.getExistingDirectory(self, "Seleccionar carpeta", self.value() or "")
+            chosen = QFileDialog.getExistingDirectory(
+                self, self.tr("Seleccionar carpeta"), self.value() or ""
+            )
         else:
-            chosen, _ = QFileDialog.getOpenFileName(self, "Seleccionar archivo", self.value() or "", self._file_filter)
+            chosen, _ = QFileDialog.getOpenFileName(
+                self, self.tr("Seleccionar archivo"), self.value() or "", self._file_filter
+            )
         if chosen:
             self._edit.setText(chosen)
 

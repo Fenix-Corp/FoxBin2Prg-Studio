@@ -16,7 +16,15 @@ from typing import Literal
 # Input: Job / Operation
 # ---------------------------------------------------------------------------
 
-Direction = Literal["", "BIN2PRG", "PRG2BIN"]
+#: Valor del `cType` que recibe FoxBin2Prg.
+#:
+#: - `""`         -> la direccion la decide la extension del archivo.
+#: - `"BIN2PRG"`  -> binario a texto.
+#: - `"PRG2BIN"`  -> texto a binario.
+#: - `"*"` / `"*-"` -> modo proyecto: procesa todos los archivos del .pjx/.pj2.
+#:   La direccion la decide la extension del proyecto; `"*-"` excluye el propio
+#:   archivo de proyecto del lote.
+Direction = Literal["", "BIN2PRG", "PRG2BIN", "*", "*-"]
 
 
 @dataclass(slots=True)
@@ -30,6 +38,23 @@ class OperationOptions:
     clear_unique_id: int = 1
     cfg_file: str = ""
     output_folder: str = ""
+    recompile_cwd: str = ""
+    """Carpeta desde la que recompilar, en vez de la del archivo.
+
+    FoxBin2Prg acepta en `cRecompile` un directorio ademas de `0`/`1`: si lo
+    recibe, hace `CD` ahi antes de recompilar y sigue recompilando (ver
+    `l_Recompile = (Empty(x) Or x == '1' Or Directory(x))` en foxbin2prg.prg).
+    Sirve para proyectos, donde recompilar desde la carpeta de cada archivo
+    rompe las referencias relativas (los `#include`, tipicamente).
+
+    Sólo se usa si `recompile` esta activo.
+    """
+
+    def ctype_recompile(self) -> str:
+        """Valor efectivo de `cRecompile`: la carpeta si aplica, si no el flag."""
+        if self.recompile and self.recompile_cwd:
+            return self.recompile_cwd
+        return str(self.recompile)
 
 
 @dataclass(slots=True)
@@ -66,7 +91,7 @@ class Job:
                 "type": op.type,
                 "noTimestamps": str(op.options.no_timestamps),
                 "debug": str(op.options.debug),
-                "recompile": str(op.options.recompile),
+                "recompile": op.options.ctype_recompile(),
                 "backupLevels": str(op.options.backup_levels),
                 "clearUniqueID": str(op.options.clear_unique_id),
                 "cfgFile": op.options.cfg_file,

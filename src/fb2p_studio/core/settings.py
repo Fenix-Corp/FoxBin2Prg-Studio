@@ -29,6 +29,24 @@ class Settings:
     def fb2p_home(self, value: str) -> None:
         self._s.setValue("paths/fb2p_home", value)
 
+    # --- actualizaciones ---
+    @property
+    def update_manifest(self) -> str:
+        """Ruta al manifiesto de version. Vacio = usar el default del NAS."""
+        return str(self._s.value("updates/manifest", "", type=str))
+
+    @update_manifest.setter
+    def update_manifest(self, value: str) -> None:
+        self._s.setValue("updates/manifest", value)
+
+    @property
+    def check_updates_on_start(self) -> bool:
+        return bool(self._s.value("updates/on_start", True, type=bool))
+
+    @check_updates_on_start.setter
+    def check_updates_on_start(self, value: bool) -> None:
+        self._s.setValue("updates/on_start", bool(value))
+
     # --- defaults de opciones avanzadas ---
     def get_int(self, key: str, default: int) -> int:
         v = self._s.value(f"defaults/{key}", default, type=int)
