@@ -10,6 +10,7 @@ from PySide6.QtWidgets import QFormLayout, QLabel, QVBoxLayout, QWidget
 from fb2p_studio import __version__
 from fb2p_studio.core.discovery import bundled_fb2p_dir, resolve
 from fb2p_studio.core.settings import Settings
+from fb2p_studio.ui.widgets.elided_label import ElidedLabel
 
 
 class AboutTab(QWidget):
@@ -17,9 +18,11 @@ class AboutTab(QWidget):
         super().__init__(parent)
         self._settings = settings
 
-        self._lbl_vfp = QLabel()
-        self._lbl_fb2p = QLabel()
-        self._lbl_bridge = QLabel()
+        # Rutas: elididas, para que una ruta larga no le fije un ancho minimo
+        # enorme a toda la ventana. El texto completo queda en el tooltip.
+        self._lbl_vfp = ElidedLabel()
+        self._lbl_fb2p = ElidedLabel()
+        self._lbl_bridge = ElidedLabel()
 
         header = QLabel(
             f"<h2>FoxBin2Prg-Studio {__version__}</h2>"

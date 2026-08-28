@@ -4,43 +4,43 @@
 <context>
     <name>AboutTab</name>
     <message>
-        <location filename="../../ui/tab_about.py" line="27"/>
+        <location filename="../../ui/tab_about.py" line="30"/>
         <source>&lt;p&gt;GUI de administracion para &lt;b&gt;FoxBin2Prg&lt;/b&gt; — utilitario generico para proyectos VFP9.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_about.py" line="35"/>
+        <location filename="../../ui/tab_about.py" line="38"/>
         <source>vfp9.exe:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_about.py" line="36"/>
+        <location filename="../../ui/tab_about.py" line="39"/>
         <source>FoxBin2Prg (home):</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_about.py" line="37"/>
+        <location filename="../../ui/tab_about.py" line="40"/>
         <source>Bridge PRG:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_about.py" line="41"/>
+        <location filename="../../ui/tab_about.py" line="44"/>
         <source>&lt;p&gt;&lt;b&gt;FoxBin2Prg&lt;/b&gt; es obra de &lt;a href=&apos;https://github.com/fdbozzo/foxbin2prg&apos;&gt;Fernando D. Bozzo&lt;/a&gt; y mantenido por &lt;a href=&apos;https://github.com/lscheffler/foxbin2prg&apos;&gt;Lutz Scheffler&lt;/a&gt;. Se distribuye bajo licencia &lt;a href=&apos;https://creativecommons.org/licenses/by/4.0/&apos;&gt;CC BY 4.0&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;Esta GUI habla con FoxBin2Prg vía su &lt;b&gt;Object API&lt;/b&gt; (&lt;code&gt;c_foxbin2prg&lt;/code&gt;) para reportar errores estructurados (excepción, línea, detalle) en lugar del &lt;code&gt;ErrorLevel 0/1&lt;/code&gt; del CLI.&lt;/p&gt;&lt;p&gt;FoxBin2Prg-Studio: MIT.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_about.py" line="65"/>
-        <location filename="../../ui/tab_about.py" line="72"/>
+        <location filename="../../ui/tab_about.py" line="68"/>
+        <location filename="../../ui/tab_about.py" line="75"/>
         <source>&lt;no encontrado&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_about.py" line="74"/>
+        <location filename="../../ui/tab_about.py" line="77"/>
         <source>{0}  (embebido en Studio)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_about.py" line="75"/>
+        <location filename="../../ui/tab_about.py" line="78"/>
         <source>{0}  (externo)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -48,52 +48,52 @@
 <context>
     <name>AdvancedOptions</name>
     <message>
-        <location filename="../../ui/widgets/advanced_options.py" line="29"/>
+        <location filename="../../ui/widgets/advanced_options.py" line="36"/>
         <source>Opciones avanzadas</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/advanced_options.py" line="33"/>
+        <location filename="../../ui/widgets/advanced_options.py" line="40"/>
         <source>Limpiar timestamps (recomendado)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/advanced_options.py" line="35"/>
+        <location filename="../../ui/widgets/advanced_options.py" line="42"/>
         <source>Limpiar UniqueID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/advanced_options.py" line="37"/>
+        <location filename="../../ui/widgets/advanced_options.py" line="44"/>
         <source>Recompilar tras generar binario</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/advanced_options.py" line="39"/>
+        <location filename="../../ui/widgets/advanced_options.py" line="46"/>
         <source>Solo simular (dry-run)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/advanced_options.py" line="47"/>
+        <location filename="../../ui/widgets/advanced_options.py" line="54"/>
         <source>0 - sin debug</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/advanced_options.py" line="47"/>
+        <location filename="../../ui/widgets/advanced_options.py" line="54"/>
         <source>1 - log por archivo</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/advanced_options.py" line="47"/>
+        <location filename="../../ui/widgets/advanced_options.py" line="54"/>
         <source>2 - log extendido</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/advanced_options.py" line="55"/>
+        <location filename="../../ui/widgets/advanced_options.py" line="63"/>
         <source>Backups (n .bak):</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/advanced_options.py" line="56"/>
+        <location filename="../../ui/widgets/advanced_options.py" line="64"/>
         <source>Debug:</source>
         <translation type="unfinished"></translation>
     </message>

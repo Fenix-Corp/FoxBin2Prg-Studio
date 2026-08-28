@@ -54,14 +54,29 @@ class CommandPreview(QWidget):
 
     # ------------------------------------------------------------------ private
     def _apply_height(self, lines: int) -> None:
+        """Fija cuanto QUIERE medir el preview, no cuanto DEBE.
+
+        Antes esto era un `setFixedHeight()`, y con 17 lineas de job.ini
+        imponia 270 px que el preview no podia ceder. Sumado al resto, el
+        minimo de la ventana trepaba a 1013 px: en una pantalla de 768,
+        maximizar dejaba a Qt sin lugar, los controles se aplastaban por
+        debajo de su minimo y se montaban unos sobre otros. Ademas nunca
+        aparecia el scroll, porque el alto siempre alcanzaba justo.
+
+        Ahora el maximo es el alto del contenido (sigue sin acaparar espacio
+        de mas) y el minimo son `_MIN_LINES`: cuando no entra, el preview
+        encoge y muestra su barra de desplazamiento.
+        """
         fm = QFontMetrics(self._edit.font())
         line_h = fm.lineSpacing()
         # margenes internos + frame
         chrome = int(self._edit.contentsMargins().top()
                      + self._edit.contentsMargins().bottom()
                      + 2 * self._edit.frameWidth() + 8)
-        target = line_h * lines + chrome
-        self._edit.setFixedHeight(target)
+        piso = line_h * self._MIN_LINES + chrome
+        techo = line_h * lines + chrome
+        self._edit.setMinimumHeight(piso)
+        self._edit.setMaximumHeight(max(piso, techo))
 
     def _copy(self) -> None:
         QGuiApplication.clipboard().setText(self._edit.toPlainText())

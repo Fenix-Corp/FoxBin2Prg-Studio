@@ -51,7 +51,7 @@ Ver [ARCHITECTURE.md](ARCHITECTURE.md) para detalles del protocolo IPC.
 - **Ejecutable distribuible:** `dist/FoxBin2Prg-Studio.exe` (48 MB, onefile).
 - **Paquete listo para compartir:** `release/FoxBin2Prg-Studio-0.1.0/` con `.exe`, `LEEME.txt`, `LEEME.md`, `LICENCIA.txt`, `CAMBIOS.txt`. `release/FoxBin2Prg-Studio-0.1.0.zip` (45 MB) armado.
 - **Verificado end-to-end** con archivo real (`articulos_recalculo.sc2` de `C:\Facturas2\FenixForms\`): round-trip Prg→Bin y Bin→Prg en ~150-500 ms.
-- **Tests unitarios:** 148/148 pasando. Lint (ruff) limpio. `build\check.bat` corre las dos cosas.
+- **Tests unitarios:** 172/172 pasando. Lint (ruff) limpio. `build\check.bat` corre las dos cosas.
 
 ### Requisitos en máquina destino
 
@@ -221,6 +221,35 @@ analyzecodeblock_define_class, 11239
 Con el diseño del plan, el panel habría quedado vacío justo en el caso más común. Ahora `JobRunner` acumula stderr por operación y se lo pasa al árbol: la columna Error muestra la línea `Error NNNN,` y el panel, el volcado completo.
 
 **Sobre el tema ADS:** la banda corporativa sólo aparece con ese tema; con el tema Sistema la ventana queda exactamente como estaba (sin banda y sin márgenes propios). El logo (`resources/ads_logo.png`) se copió de `UtilitiesDevelopment/fnxMd2Pdf/templates/`.
+
+### 3.12 Layout en 1366x768 — sin commitear (working tree actual)
+
+Reportado desde la maquina de un usuario: al maximizar en 1366x768 los textos y
+controles se montaban, y al preview del `job.ini` no se le podia hacer scroll.
+
+**La causa medida:** el minimo de la ventana era **1013 px de alto**, mas que la
+pantalla. Cuando el minimo no entra, Qt aplasta los widgets por debajo de su
+minimo y se dibujan unos sobre otros. Tres cosas lo inflaban:
+
+| Culpable | Costaba | Por que |
+|---|---|---|
+| `CommandPreview` | 301 px | `setFixedHeight()` con el alto de 17 lineas de job.ini: no podia ceder ni mostrar scroll |
+| `AdvancedOptions` | 209 px | un `QGroupBox` checkable sólo deshabilita a los hijos; seguian ocupando su lugar |
+| `AboutTab` | 1318 px de **ancho** | las rutas en `QLabel` normales; una sola pedia 1040 px |
+
+Minimo resultante: **766x520** (Sistema) y **840x674** (ADS). Verificado ademas
+a 1024x600 y en el dialogo de Preferencias.
+
+`tests/test_layout.py` (11 casos) mide **solapamientos reales** — dos hermanos
+visibles cuyos rectangulos se intersectan — en las tres pestanas, los dos temas,
+y con las opciones avanzadas abiertas y cerradas. No depende de mirar capturas.
+
+**Trampa de Qt que aparecio armando esos tests:** `processEvents()` NO entrega
+los eventos `DeferredDelete`, asi que las ventanas cerradas con `deleteLater()`
+seguian vivas. Como `theme.apply()` reestila TODAS las ventanas vivas, cada test
+costaba mas que el anterior (0,2 s el primero, 2,6 s el tercero; 69 s la suite).
+Con `QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)` bajo a
+10 s.
 
 ---
 

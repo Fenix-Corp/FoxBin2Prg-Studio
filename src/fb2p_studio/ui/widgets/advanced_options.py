@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QFormLayout,
     QGroupBox,
     QSpinBox,
+    QVBoxLayout,
     QWidget,
 )
 
@@ -20,7 +21,13 @@ from fb2p_studio.core.job import OperationOptions
 
 
 class AdvancedOptions(QGroupBox):
-    """Checkable y colapsado por defecto: son opciones, no lo habitual."""
+    """Checkable y colapsado por defecto: son opciones, no lo habitual.
+
+    **Colapsa de verdad**: al desmarcarlo se ocultan los controles, no se
+    deshabilitan. Un QGroupBox checkable, por si solo, deja a los hijos
+    ocupando su lugar en gris — 209 px que en una pantalla de 768 hacen que
+    la ventana no entre y los controles se monten entre si.
+    """
 
     changed = Signal()
 
@@ -48,13 +55,24 @@ class AdvancedOptions(QGroupBox):
         )
 
         form = QFormLayout()
+        form.setContentsMargins(0, 0, 0, 0)
         form.addRow(self._chk_no_timestamps)
         form.addRow(self._chk_clear_uid)
         form.addRow(self._chk_recompile)
         form.addRow(self._chk_dry_run)
         form.addRow(self.tr("Backups (n .bak):"), self._sp_backup)
         form.addRow(self.tr("Debug:"), self._cb_debug)
-        self.setLayout(form)
+
+        # Los controles viven en un contenedor propio para poder ocultarlos
+        # enteros. Ocultos conservan su valor, asi que `to_options()` sigue
+        # leyendo lo mismo.
+        self._contenido = QWidget(self)
+        self._contenido.setLayout(form)
+        self._contenido.setVisible(False)
+
+        caja = QVBoxLayout(self)
+        caja.addWidget(self._contenido)
+        self.toggled.connect(self._contenido.setVisible)
 
         for chk in (
             self._chk_no_timestamps,
