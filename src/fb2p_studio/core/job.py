@@ -126,6 +126,16 @@ class OpStartEvent:
 
 
 @dataclass(slots=True)
+class ProgressEvent:
+    """Archivo `current` de `total`, mientras FoxBin2Prg sigue trabajando."""
+
+    op_id: str
+    current: int
+    total: int
+    text: str
+
+
+@dataclass(slots=True)
 class FileProcessedEvent:
     op_id: str
     file: str
@@ -175,6 +185,7 @@ class CancelledEvent:
 Event = (
     JobStartEvent
     | OpStartEvent
+    | ProgressEvent
     | FileProcessedEvent
     | OpDoneEvent
     | OpErrorEvent
@@ -200,6 +211,13 @@ def parse_event(payload: dict) -> Event | None:
             op_id=payload["opId"],
             file=payload["file"],
             direction=payload.get("direction", ""),
+        )
+    if kind == "progress":
+        return ProgressEvent(
+            op_id=payload.get("opId", ""),
+            current=int(payload.get("current", 0)),
+            total=int(payload.get("total", 0)),
+            text=payload.get("text", ""),
         )
     if kind == "file_processed":
         return FileProcessedEvent(

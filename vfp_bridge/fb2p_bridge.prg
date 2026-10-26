@@ -16,7 +16,7 @@ LPARAMETERS tcJobFileOverride
 
 LOCAL lcJobFile, lcJobBody, loJob, loSection, loFB, loEx
 LOCAL lcHome, lcFB2P, lcEventFile, lnDryRun, lcFB2PVer, lcVFPVer
-LOCAL lcOpId, lcFile, lcType, lcOutFolder
+LOCAL lcOpId, lcFile, lcType, lcOutFolder, loHook
 LOCAL lnI, lnJ, lnCnt, lnStart, lnElapsed, lnRet, lnGlobalStart
 LOCAL lnOkCount, lnErrCount
 LOCAL ARRAY laProcs[1, 6]
@@ -87,6 +87,18 @@ emit_event(lcEventFile, ;
 lnOkCount  = 0
 lnErrCount = 0
 
+* Progreso en vivo. FoxBin2Prg procesa un proyecto entero dentro de UN solo
+* execute() y llama a updateProgressbar(texto, i, total, tipo) por cada
+* archivo. Sin este enganche la GUI no recibe nada hasta que execute() vuelve,
+* que con un proyecto grande son minutos de ventana quieta.
+loHook = CREATEOBJECT("progress_hook", lcEventFile)
+TRY
+    BINDEVENT(loFB, "updateProgressbar", loHook, "OnProgress")
+CATCH
+    * Sin progreso en vivo; la operacion se ejecuta igual.
+    loHook = NULL
+ENDTRY
+
 FOR lnI = 1 TO loJob.op_count
     loSection = loJob.op_at(lnI)
     IF ISNULL(loSection)
@@ -96,6 +108,10 @@ FOR lnI = 1 TO loJob.op_count
     lcOpId = loSection.op_id
     lcFile = loSection.get_value("file", "")
     lcType = sanitize_ctype(loSection.get_value("type", ""))
+
+    IF NOT ISNULL(loHook)
+        loHook.op_id = lcOpId
+    ENDIF
 
     emit_event(lcEventFile, ;
         '{"event":"op_start"' + ;
@@ -427,6 +443,41 @@ FUNCTION get_val
     ENDIF
     RETURN loSec.get_value(tcKey, lcDefault)
 ENDFUNC
+
+
+*========================================================================
+* Receptor de updateProgressbar de FoxBin2Prg -> evento JSONL "progress"
+*
+* FoxBin2Prg tambien la llama desde dentro de cada conversion (tipo 1 y 2:
+* pasos internos de un mismo archivo). Solo el tipo 0 es "archivo i de N".
+*========================================================================
+DEFINE CLASS progress_hook AS Custom
+    event_file = ""
+    op_id = ""
+
+    PROCEDURE Init
+        LPARAMETERS tcEventFile
+        THIS.event_file = tcEventFile
+    ENDPROC
+
+    PROCEDURE OnProgress
+        LPARAMETERS tcText, tnCurrent, tnTotal, tnType
+        TRY
+            IF VARTYPE(tnType) == "N" AND VARTYPE(tnTotal) == "N" AND VARTYPE(tnCurrent) == "N"
+                IF tnType == 0 AND tnTotal > 0
+                    emit_event(THIS.event_file, ;
+                        '{"event":"progress"' + ;
+                        ',"opId":"' + json_esc(THIS.op_id) + '"' + ;
+                        ',"current":' + TRANSFORM(INT(tnCurrent)) + ;
+                        ',"total":' + TRANSFORM(INT(tnTotal)) + ;
+                        ',"text":"' + json_esc(nvs(tcText)) + '"}')
+                ENDIF
+            ENDIF
+        CATCH
+            * Un fallo al informar no debe abortar la conversion.
+        ENDTRY
+    ENDPROC
+ENDDEFINE
 
 
 DEFINE CLASS ini_root AS Custom

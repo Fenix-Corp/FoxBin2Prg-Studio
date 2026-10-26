@@ -22,6 +22,7 @@ from fb2p_studio.core.job import (
     OpDoneEvent,
     OpErrorEvent,
     OpStartEvent,
+    ProgressEvent,
     parse_event,
 )
 
@@ -31,6 +32,7 @@ class EventStream(QObject):
 
     job_started = Signal(JobStartEvent)
     op_started = Signal(OpStartEvent)
+    progress = Signal(ProgressEvent)
     file_processed = Signal(FileProcessedEvent)
     op_done = Signal(OpDoneEvent)
     op_error = Signal(OpErrorEvent)
@@ -88,6 +90,8 @@ class EventStream(QObject):
             self.job_started.emit(event)
         elif isinstance(event, OpStartEvent):
             self.op_started.emit(event)
+        elif isinstance(event, ProgressEvent):
+            self.progress.emit(event)
         elif isinstance(event, FileProcessedEvent):
             self.file_processed.emit(event)
         elif isinstance(event, OpDoneEvent):

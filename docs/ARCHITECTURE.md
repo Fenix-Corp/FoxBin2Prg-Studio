@@ -125,7 +125,8 @@ Un JSON por línea, con `flush` implícito (cada línea es un `STRTOFILE(..., AD
 |---|---|---|
 | `job_start` | Al arrancar el driver | `total`, `timestamp`, `vfpVersion`, `fb2pVersion` |
 | `op_start` | Antes de cada `execute()` | `opId`, `file`, `direction` |
-| `file_processed` | Fila del `get_Processed()` | `opId`, `inOut`, `file`, `hasErrors`, `supported`, `expanded` |
+| `progress` | **En vivo**, una vez por archivo mientras `execute()` sigue corriendo (via `BINDEVENT` a `updateProgressbar`, tipo 0) | `opId`, `current`, `total`, `text` |
+| `file_processed` | Fila del `get_Processed()` (al volver `execute()`) | `opId`, `inOut`, `file`, `hasErrors`, `supported`, `expanded` |
 | `op_error` | `CATCH TO loEx` disparó | `opId`, `errorNo`, `message`, `lineNo`, `details` |
 | `op_done` | Después de cada `execute()` | `opId`, `returnCode`, `elapsedMs` |
 | `job_done` | Antes de `QUIT` | `okCount`, `errCount`, `elapsedMs` |

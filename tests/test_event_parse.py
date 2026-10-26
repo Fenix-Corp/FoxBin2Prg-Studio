@@ -12,6 +12,7 @@ from fb2p_studio.core.job import (
     OpDoneEvent,
     OpErrorEvent,
     OpStartEvent,
+    ProgressEvent,
     parse_event,
 )
 
@@ -40,6 +41,7 @@ def test_parse_op_error() -> None:
 def test_parse_all_kinds() -> None:
     kinds = [
         ('{"event":"op_start","opId":"o","file":"f","direction":"BIN2PRG"}', OpStartEvent),
+        ('{"event":"progress","opId":"o","current":3,"total":10,"text":"x"}', ProgressEvent),
         ('{"event":"file_processed","opId":"o","file":"f","inOut":"O",'
          '"processed":1,"hasErrors":0,"supported":1,"expanded":1}', FileProcessedEvent),
         ('{"event":"op_done","opId":"o","returnCode":0,"elapsedMs":10}', OpDoneEvent),
@@ -53,3 +55,13 @@ def test_parse_all_kinds() -> None:
 
 def test_parse_unknown_returns_none() -> None:
     assert parse_event({"event": "not_a_real_event"}) is None
+
+
+def test_parse_progress() -> None:
+    texto = "Procesando C:/p/año.scx..."
+    ev = parse_event(json.loads(json.dumps(
+        {"event": "progress", "opId": "proyecto", "current": 12, "total": 1040, "text": texto}
+    )))
+    assert isinstance(ev, ProgressEvent)
+    assert (ev.op_id, ev.current, ev.total) == ("proyecto", 12, 1040)
+    assert ev.text == texto
