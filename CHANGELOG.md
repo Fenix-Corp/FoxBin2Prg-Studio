@@ -4,6 +4,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **Una corrida larga no mostraba avance.** FoxBin2Prg procesa un proyecto entero dentro de un solo `execute()` y el driver sólo emitia eventos al volver, asi que con un proyecto grande la ventana quedaba en "procesando..." minutos, sin barra y sin nada en el log. Ahora el driver se engancha con `BINDEVENT` a `updateProgressbar` de `c_foxbin2prg` y emite un evento `progress` por archivo; la GUI muestra una barra (`n / N`, porcentaje y archivo en curso) en las pestanas Convertir y Proyecto, y una linea `[n/N]` por archivo en el log. Los `file_processed` siguen llegando al final, con el detalle de cada archivo.
+
 ### Added
 - **Árbol de resultados** (`ui/widgets/results_view.py`) — reemplaza al log lineal como vista principal de una corrida: cada operación es una fila con sus archivos colgando (Archivo · Dirección · Estado · Tiempo · Error), con filtro *sólo lo que falló* y panel de detalle del error abajo. El log sigue disponible en una pestaña al lado.
 - **Tema ADS corporativo, elegible en Preferencias** — el mismo azul #1F3A5E, la banda superior y la hoja de estilo de las demás utilidades del departamento. El tema **Sistema** (Fusion claro/oscuro) sigue siendo el de por defecto y quedó igual que antes. Se cambia sin reiniciar. Los colores del log están medidos contra su fondo y `tests/test_theme_contrast.py` verifica WCAG AA en cada corrida.

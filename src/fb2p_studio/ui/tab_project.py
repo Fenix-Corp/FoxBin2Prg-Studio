@@ -54,6 +54,7 @@ from fb2p_studio.ui.widgets.log_view import LogView
 from fb2p_studio.ui.widgets.path_picker import PathPicker
 from fb2p_studio.ui.widgets.project_contents import ProjectContentsView
 from fb2p_studio.ui.widgets.results_view import ResultsView
+from fb2p_studio.ui.widgets.run_progress import RunProgress
 
 
 class ProjectTab(QWidget):
@@ -129,8 +130,10 @@ class ProjectTab(QWidget):
         self._btn_cancel = QPushButton(self.tr("Cancelar"))
         self._btn_cancel.setEnabled(False)
 
+        self._run_progress = RunProgress()
+
         run_row = QHBoxLayout()
-        run_row.addStretch(1)
+        run_row.addWidget(self._run_progress, 1)
         run_row.addWidget(self._btn_cancel)
         run_row.addWidget(self._btn_run)
 
@@ -143,6 +146,7 @@ class ProjectTab(QWidget):
         self._salida.addTab(self._log, self.tr("Log"))
         self._runner = JobRunner(self._log, self, self._results)
         self._btn_cancel.clicked.connect(self._runner.cancel)
+        self._runner.progress.connect(self._run_progress.update_progress)
         self._runner.started.connect(lambda: self._set_running(True))
         self._runner.finished.connect(lambda: self._set_running(False))
 
@@ -174,6 +178,10 @@ class ProjectTab(QWidget):
     def _set_running(self, running: bool) -> None:
         self._btn_run.setEnabled(not running)
         self._btn_cancel.setEnabled(running)
+        if running:
+            self._run_progress.begin()
+        else:
+            self._run_progress.end()
 
     def _direction_text(self, path: str) -> str:
         """Que va a hacer FoxBin2Prg, deducido de la extension."""

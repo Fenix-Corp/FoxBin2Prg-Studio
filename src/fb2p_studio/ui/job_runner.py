@@ -25,6 +25,7 @@ from fb2p_studio.core.job import (
     OpDoneEvent,
     OpErrorEvent,
     OpStartEvent,
+    ProgressEvent,
 )
 from fb2p_studio.ui.widgets.log_view import LogView
 from fb2p_studio.ui.widgets.results_view import ResultsView
@@ -35,6 +36,8 @@ class JobRunner(QObject):
 
     started = Signal()
     finished = Signal()
+    # (archivo actual, total, texto) mientras FoxBin2Prg sigue trabajando.
+    progress = Signal(int, int, str)
 
     def __init__(
         self,
@@ -81,6 +84,7 @@ class JobRunner(QObject):
         assert bridge.events is not None
         bridge.events.job_started.connect(self._on_job_started)
         bridge.events.op_started.connect(self._on_op_started)
+        bridge.events.progress.connect(self._on_progress)
         bridge.events.file_processed.connect(self._on_file_processed)
         bridge.events.op_done.connect(self._on_op_done)
         bridge.events.op_error.connect(self._on_op_error)
@@ -120,6 +124,11 @@ class JobRunner(QObject):
         self._log.append(f"→ op_start [{ev.op_id}] {ev.direction} · {ev.file}", severity="info")
         if self._results is not None:
             self._results.start_op(ev)
+
+    def _on_progress(self, ev: ProgressEvent) -> None:
+        # `text` ya trae el verbo y la ruta, localizados por FoxBin2Prg.
+        self._log.append(f"  [{ev.current}/{ev.total}] {ev.text}", severity="muted")
+        self.progress.emit(ev.current, ev.total, ev.text)
 
     def _on_file_processed(self, ev: FileProcessedEvent) -> None:
         tag = "OK " if not ev.has_errors else "ERR"
