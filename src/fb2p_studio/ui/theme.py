@@ -1,8 +1,11 @@
-"""Aplicacion del estilo y paleta. Hay dos temas a elegir.
+"""Aplicacion del estilo y paleta. Hay tres temas a elegir.
 
-**Sistema** (el de siempre, y el que sigue viniendo por defecto): **Fusion**,
-el estilo mas neutro y consistente entre versiones de Windows, con la paleta
-clara u oscura segun como este el OS. Se mimetiza con el escritorio.
+**Claro** y **Oscuro**: **Fusion**, el estilo mas neutro y consistente entre
+versiones de Windows. Se eligen por separado, no segun Windows: quien quiere el
+oscuro lo quiere aunque el escritorio este en claro. El claro usa los neutros
+de la paleta corporativa Fenix (fondo #F7FAFC, texto #2D3748) y selecciona con
+un azul CLARO (#AFC3DC) y texto negro, no con el azul saturado de Windows: asi
+lo elegido se sigue leyendo sin esfuerzo.
 
 **ADS corporativo**: la identidad de la casa — el mismo azul #1F3A5E y la
 misma banda superior que el resto de las utilidades del departamento y que
@@ -10,7 +13,13 @@ los PDF que produce `md2pdf`. Sirve para que las herramientas se vean como
 una familia. Es siempre claro: la identidad corporativa no tiene version
 oscura.
 
-En los dos casos se exponen los colores semanticos del log
+Hasta 2026-10-28 habia un unico tema «Sistema» que tomaba claro u oscuro de
+Windows. Su id (`sistema`) sigue siendo el de por defecto mientras nadie elija
+otro, y el que puede haber en el .ini de alguien: al aplicarlo se resuelve a
+Claro u Oscuro segun Windows, como hacia antes. Igual que en
+`UtilitiesDevelopment/shell/theme.py`, de donde se porto la separacion.
+
+En todos los casos se exponen los colores semanticos del log
 (info/ok/warn/error/muted) para que cambien con el tema en vez de ser fijos.
 """
 
@@ -25,14 +34,20 @@ from PySide6.QtWidgets import QApplication
 from fb2p_studio.ui import theme_ads
 
 #: Identificadores de tema. Se persisten en el .ini: no cambiarlos.
-SISTEMA = "sistema"
 ADS = "ads"
+CLARO = "claro"
+OSCURO = "oscuro"
+#: Ya no se ofrece, pero es el de por defecto (nada elegido todavia) y se
+#: acepta del .ini: se resuelve a Claro u Oscuro segun Windows (ver `apply`).
+SISTEMA = "sistema"
 DEFAULT = SISTEMA
 
-#: Nombre visible de cada tema, en el orden en que se ofrecen.
+#: Nombre visible de cada tema, en el orden en que se ofrecen. El mismo orden
+#: que en UtilitiesDevelopment: las dos herramientas se leen igual.
 NOMBRES: dict[str, str] = {
-    SISTEMA: "Sistema (claro/oscuro segun Windows)",
     ADS: "ADS corporativo",
+    CLARO: "Claro",
+    OSCURO: "Oscuro",
 }
 
 
@@ -45,12 +60,13 @@ class LogColors:
     muted: QColor
 
 
+#: Sobre el fondo claro (#F7FAFC, el de los formularios Fenix).
 _LIGHT = LogColors(
-    info=QColor("#212121"),
+    info=QColor("#2D3748"),
     ok=QColor("#1b7f34"),
     warn=QColor("#a86500"),
     error=QColor("#c62828"),
-    muted=QColor("#6b6b6b"),
+    muted=QColor("#637083"),
 )
 
 _DARK = LogColors(
@@ -68,6 +84,9 @@ def is_dark_mode(app: QApplication) -> bool:
     Qt 6.5+ expone `QStyleHints.colorScheme()`. En Windows 11 con tema
     oscuro devuelve `Qt.ColorScheme.Dark`. Si no esta disponible, cae a
     heuristica sobre la paleta actual.
+
+    Solo sirve para resolver el id `sistema`. Para saber si el tema APLICADO
+    es oscuro, `is_dark()`.
     """
     hints = app.styleHints()
     if hasattr(hints, "colorScheme"):
@@ -92,33 +111,38 @@ _ADS = LogColors(
 )
 
 
-#: Tema aplicado ahora mismo. Lo consultan la banda corporativa (que sólo
-#: existe con el tema ADS) y los textos de ayuda, que necesitan un gris que
-#: se lea en el tema que este puesto.
-_current = DEFAULT
+#: Tema aplicado ahora mismo, ya resuelto (nunca `sistema`). Lo consultan la
+#: banda corporativa (que sólo existe con el tema ADS), Preferencias y los
+#: textos de ayuda, que necesitan un gris que se lea en el tema puesto.
+_current = CLARO
 
 
 def current() -> str:
     return _current
 
 
+def is_dark() -> bool:
+    """Si el tema APLICADO es oscuro (no si Windows lo esta)."""
+    return _current == OSCURO
+
+
 def hint_color() -> str:
     """Gris de los textos de ayuda, acorde al tema aplicado.
 
-    Con el tema Sistema tiene que servir en claro Y en oscuro: un `#666` fijo
-    (lo que habia) es ilegible sobre el fondo oscuro de Windows.
+    Un gris fijo pensado para fondo blanco es ilegible sobre el oscuro. En el
+    claro es el gris pizarra de la paleta Fenix (#637083, 4,8:1 sobre el
+    fondo): el «texto secundario» #718096 se queda en 3,8:1.
     """
     if _current == ADS:
         return theme_ads.TEXT_MUTED
-    app = QApplication.instance()
-    if isinstance(app, QApplication) and is_dark_mode(app):
+    if _current == OSCURO:
         return "#9a9a9a"
-    return "#666666"
+    return "#637083"
 
 
 def normalize(name: str | None) -> str:
     """Un tema desconocido en el .ini no rompe nada: cae al de siempre."""
-    return name if name in NOMBRES else DEFAULT
+    return name if name in NOMBRES or name == SISTEMA else DEFAULT
 
 
 def apply(app: QApplication, name: str | None = None) -> LogColors:
@@ -130,14 +154,18 @@ def apply(app: QApplication, name: str | None = None) -> LogColors:
     y `MainWindow` los reparte (`set_log_colors`).
     """
     global _current
-    _current = normalize(name)
-    return _apply_ads(app) if _current == ADS else _apply_sistema(app)
+    name = normalize(name)
+    if name == SISTEMA:
+        name = OSCURO if is_dark_mode(app) else CLARO
+    _current = name
+    if _current == ADS:
+        return _apply_ads(app)
+    return _apply_fusion(app, dark=_current == OSCURO)
 
 
-def _apply_sistema(app: QApplication) -> LogColors:
+def _apply_fusion(app: QApplication, dark: bool) -> LogColors:
     app.setStyleSheet("")
     app.setStyle("Fusion")
-    dark = is_dark_mode(app)
     app.setPalette(_dark_palette() if dark else _light_palette())
     return _DARK if dark else _LIGHT
 
@@ -147,7 +175,7 @@ def _apply_ads(app: QApplication) -> LogColors:
     # (dialogos estandar, tooltips), y sin ella un Windows en modo oscuro
     # dejaria texto claro sobre los fondos blancos del QSS.
     app.setStyle("Fusion")
-    app.setPalette(_light_palette())
+    app.setPalette(_ads_palette())
     app.setStyleSheet(theme_ads.stylesheet())
     return _ADS
 
@@ -155,7 +183,8 @@ def _apply_ads(app: QApplication) -> LogColors:
 # ---------------------------------------------------------------------------
 # Paletas
 # ---------------------------------------------------------------------------
-def _light_palette() -> QPalette:
+def _ads_palette() -> QPalette:
+    """La paleta de fondo del tema ADS: casi todo lo viste su hoja de estilo."""
     p = QPalette()
     p.setColor(QPalette.ColorRole.Window, QColor("#f3f3f3"))
     p.setColor(QPalette.ColorRole.WindowText, QColor("#1a1a1a"))
@@ -170,6 +199,35 @@ def _light_palette() -> QPalette:
     p.setColor(QPalette.ColorRole.Link, QColor("#0067c0"))
     p.setColor(QPalette.ColorRole.Highlight, QColor("#0067c0"))
     p.setColor(QPalette.ColorRole.HighlightedText, QColor("#ffffff"))
+    return p
+
+
+def _light_palette() -> QPalette:
+    """Tema Claro, con los neutros canonicos de la paleta corporativa Fenix.
+
+    La seleccion (listas, arbol de resultados, menus) es el azul claro de
+    «Bancos» (#AFC3DC) con texto negro, 11,7:1: se distingue del fondo y el
+    texto elegido se lee sin esfuerzo, que con el azul saturado de Windows
+    no pasaba.
+    """
+    p = QPalette()
+    p.setColor(QPalette.ColorRole.Window, QColor("#F7FAFC"))
+    p.setColor(QPalette.ColorRole.WindowText, QColor("#2D3748"))
+    p.setColor(QPalette.ColorRole.Base, QColor("#FFFFFF"))
+    p.setColor(QPalette.ColorRole.AlternateBase, QColor("#F4F6F9"))
+    p.setColor(QPalette.ColorRole.ToolTipBase, QColor("#FFFFFF"))
+    p.setColor(QPalette.ColorRole.ToolTipText, QColor("#2D3748"))
+    p.setColor(QPalette.ColorRole.Text, QColor("#2D3748"))
+    p.setColor(QPalette.ColorRole.Button, QColor("#F4F6F9"))
+    p.setColor(QPalette.ColorRole.ButtonText, QColor("#2D3748"))
+    p.setColor(QPalette.ColorRole.BrightText, QColor("#7F1D1D"))
+    p.setColor(QPalette.ColorRole.Link, QColor("#325582"))
+    p.setColor(QPalette.ColorRole.Highlight, QColor("#AFC3DC"))
+    p.setColor(QPalette.ColorRole.HighlightedText, QColor("#000000"))
+    p.setColor(QPalette.ColorRole.PlaceholderText, QColor("#637083"))
+    for rol in (QPalette.ColorRole.WindowText, QPalette.ColorRole.Text,
+                QPalette.ColorRole.ButtonText):
+        p.setColor(QPalette.ColorGroup.Disabled, rol, QColor("#9AA4B2"))
     return p
 
 

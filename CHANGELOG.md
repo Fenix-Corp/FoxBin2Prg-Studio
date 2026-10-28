@@ -4,6 +4,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- **Temas Claro y Oscuro por separado** — el tema «Sistema», que copiaba el modo de Windows, se separa en **Claro** y **Oscuro**, elegibles en Preferencias junto a ADS corporativo (mismo orden y mismos colores que `UtilitiesDevelopment`). Claro usa los neutros de la paleta Fénix y selecciona con un azul claro (`#AFC3DC`) y texto negro. Sin tema elegido, Studio sigue arrancando en Claro u Oscuro según Windows, y el id `sistema` del `.ini` se sigue aceptando.
+- **Menús legibles en el tema ADS** — la opción bajo el ratón pasa del azul corporativo lleno a un tono claro con texto azul marino, como en el árbol y la barra de menús.
+
 ### Fixed
 - **Una corrida larga no mostraba avance.** FoxBin2Prg procesa un proyecto entero dentro de un solo `execute()` y el driver sólo emitia eventos al volver, asi que con un proyecto grande la ventana quedaba en "procesando..." minutos, sin barra y sin nada en el log. Ahora el driver se engancha con `BINDEVENT` a `updateProgressbar` de `c_foxbin2prg` y emite un evento `progress` por archivo; la GUI muestra una barra (`n / N`, porcentaje y archivo en curso) en las pestanas Convertir y Proyecto, y una linea `[n/N]` por archivo en el log. Los `file_processed` siguen llegando al final, con el detalle de cada archivo.
 

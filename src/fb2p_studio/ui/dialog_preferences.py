@@ -64,8 +64,10 @@ class PreferencesDialog(QDialog):
         self._tema = QComboBox()
         for tema_id, nombre in theme.NOMBRES.items():
             self._tema.addItem(nombre, tema_id)
-        actual = theme.normalize(settings.theme)
-        self._tema.setCurrentIndex(max(0, self._tema.findData(actual)))
+        # El tema APLICADO, ya resuelto: el del .ini puede ser `sistema` (o
+        # nada), que no esta en la lista, y el combo caeria en la primera
+        # opcion; un OK cambiaria el tema sin que nadie lo pidiera.
+        self._tema.setCurrentIndex(max(0, self._tema.findData(theme.current())))
 
         self._manifest = PathPicker(
             mode="file",

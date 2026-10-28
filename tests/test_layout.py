@@ -95,7 +95,7 @@ def _solapamientos(raiz: QWidget) -> list[str]:
     return choques
 
 
-@pytest.mark.parametrize("tema", [theme.SISTEMA, theme.ADS])
+@pytest.mark.parametrize("tema", [theme.CLARO, theme.ADS])
 def test_la_ventana_entra_en_la_pantalla(ventana, tema: str) -> None:  # noqa: ANN001
     """Si el minimo no entra, Qt aplasta los controles y se montan."""
     win = ventana(tema)
@@ -111,13 +111,13 @@ def test_la_ventana_entra_en_la_pantalla(ventana, tema: str) -> None:  # noqa: A
     )
 
 
-@pytest.mark.parametrize("tema", [theme.SISTEMA, theme.ADS])
+@pytest.mark.parametrize("tema", [theme.CLARO, theme.ADS])
 def test_el_alto_pedido_se_respeta(ventana, tema: str) -> None:  # noqa: ANN001
     win = ventana(tema)
     assert win.height() == ALTO_UTIL
 
 
-@pytest.mark.parametrize("tema", [theme.SISTEMA, theme.ADS])
+@pytest.mark.parametrize("tema", [theme.CLARO, theme.ADS])
 def test_ninguna_pestana_se_monta(ventana, qapp, tema: str) -> None:  # noqa: ANN001
     win = ventana(tema)
     for i in range(win._tabs.count()):  # noqa: SLF001
@@ -129,7 +129,7 @@ def test_ninguna_pestana_se_monta(ventana, qapp, tema: str) -> None:  # noqa: AN
         )
 
 
-@pytest.mark.parametrize("tema", [theme.SISTEMA, theme.ADS])
+@pytest.mark.parametrize("tema", [theme.CLARO, theme.ADS])
 def test_con_las_opciones_avanzadas_desplegadas_tampoco(ventana, qapp, tema: str) -> None:  # noqa: ANN001
     """El peor caso: el grupo colapsable abierto suma ~170 px."""
     win = ventana(tema)
@@ -146,7 +146,7 @@ def test_con_las_opciones_avanzadas_desplegadas_tampoco(ventana, qapp, tema: str
 def test_las_opciones_avanzadas_colapsan_de_verdad(ventana, qapp) -> None:  # noqa: ANN001
     """Desmarcado tiene que OCULTAR, no sólo deshabilitar: un QGroupBox
     checkable deja a los hijos ocupando su lugar en gris."""
-    win = ventana(theme.SISTEMA)
+    win = ventana(theme.CLARO)
     adv = win._tab_convert._adv  # noqa: SLF001
 
     adv.setChecked(True)
@@ -164,7 +164,7 @@ def test_las_opciones_avanzadas_colapsan_de_verdad(ventana, qapp) -> None:  # no
 
 def test_el_preview_puede_encoger_y_hacer_scroll(ventana) -> None:  # noqa: ANN001
     """Con altura fija nunca aparecia el scroll y no se llegaba al final."""
-    win = ventana(theme.SISTEMA)
+    win = ventana(theme.CLARO)
     edit = win._tab_convert._preview._edit  # noqa: SLF001
 
     assert edit.minimumHeight() < edit.maximumHeight(), (
@@ -175,7 +175,7 @@ def test_el_preview_puede_encoger_y_hacer_scroll(ventana) -> None:  # noqa: ANN0
 
 def test_las_rutas_largas_no_estiran_la_ventana(ventana) -> None:  # noqa: ANN001
     """Una ruta larga en Acerca de le fijaba a la ventana 1318 px de ancho."""
-    win = ventana(theme.SISTEMA)
+    win = ventana(theme.CLARO)
     etiqueta = win._tab_about._lbl_fb2p  # noqa: SLF001
 
     etiqueta.setText(r"D:\una\ruta\absurdamente\larga\que\nadie\deberia\tener\pero\pasa\x.exe")

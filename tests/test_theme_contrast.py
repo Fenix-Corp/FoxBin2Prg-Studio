@@ -1,4 +1,4 @@
-"""Contraste WCAG de los pares texto/fondo del tema ADS.
+"""Contraste WCAG de los pares texto/fondo del tema ADS (y los de Claro/Oscuro).
 
 Portado de `UtilitiesDevelopment/tools/check_contrast.py`, donde el ambar
 "natural" (#9d6b00) se cambio justamente porque daba 4,09:1 y no llegaba al
@@ -70,6 +70,16 @@ CASOS = [
     ("texto de ayuda", T.TEXT_MUTED, T.SURFACE_ALT, 4.5),
     ("barra de estado", T.TEXT_MUTED, T.SURFACE_ALT, 4.5),
     ("encabezado de columna", T.TEXT_MUTED, T.SURFACE_ALT, 4.5),
+    # Menus desplegables (Archivo, Herramientas, Ayuda).
+    ("menu · reposo", T.TEXT, T.SURFACE, 4.5),
+    ("menu · raton encima", T.PRIMARY_DARK, T.HOVER_BG, 4.5),
+    # Temas Claro y Oscuro: estan escritos en las paletas de ui/theme.py.
+    ("claro · texto", "#2D3748", "#F7FAFC", 4.5),
+    ("claro · ayuda (gris pizarra)", "#637083", "#F7FAFC", 4.5),
+    ("claro · seleccion (azul claro)", "#000000", "#AFC3DC", 4.5),
+    ("oscuro · texto", "#e6e6e6", "#2b2b2b", 4.5),
+    ("oscuro · ayuda", "#9a9a9a", "#2b2b2b", 4.5),
+    ("oscuro · seleccion", "#ffffff", "#3d6ea5", 4.5),
 ]
 
 

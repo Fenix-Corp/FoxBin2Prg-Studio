@@ -131,12 +131,17 @@ Los links de compartir de Drive y SharePoint se convierten solos a su forma de d
 
 ### Temas
 
-Hay dos, elegibles en **Herramientas → Preferencias** y aplicables sin reiniciar:
+Hay tres, elegibles en **Herramientas → Preferencias** y aplicables sin reiniciar:
 
 | Tema | Qué es |
 |---|---|
-| **Sistema** (por defecto) | Fusion con paleta clara u oscura según Windows. Se mimetiza con el escritorio. |
 | **ADS corporativo** | La identidad de la casa: azul `#1F3A5E`, banda superior con logo y hoja de estilo propia — la misma que el resto de las utilidades del departamento y que los PDF de `md2pdf`. |
+| **Claro** | Fusion con los neutros de la paleta Fénix (fondo `#F7FAFC`, texto `#2D3748`). Selecciona con un azul **claro** (`#AFC3DC`) y texto negro, para que lo elegido se lea sin esfuerzo. |
+| **Oscuro** | Fusion con fondo gris oscuro. |
+
+Claro y Oscuro se eligen por separado, **no según Windows**. Mientras no se elija ninguno, Studio arranca en Claro u Oscuro según Windows, como hacía el antiguo tema «Sistema»; su id (`sistema`) se sigue aceptando del `.ini`. La separación y los colores son los mismos de `UtilitiesDevelopment`.
+
+En el tema ADS, los menús desplegables marcan la opción bajo el ratón con un tono claro y texto azul marino, igual que el árbol y la barra de menús.
 
 El tema ADS está portado de `UtilitiesDevelopment/shell/theme.py`; los colores viven en [`ui/theme_ads.py`](src/fb2p_studio/ui/theme_ads.py) y **están medidos, no elegidos a ojo**: [`tests/test_theme_contrast.py`](tests/test_theme_contrast.py) verifica en cada corrida que cada par texto/fondo cumpla el 4,5:1 de WCAG 2.1 AA. Si cambia la identidad corporativa, se corrige ahí y en el CSS de `md2pdf`, no en veinte widgets sueltos.
 

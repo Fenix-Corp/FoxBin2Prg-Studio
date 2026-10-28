@@ -126,9 +126,8 @@ class MainWindow(QMainWindow):
     def _decorate(self, tema: str) -> None:
         """Lo que distingue visualmente a un tema del otro, fuera del QSS.
 
-        Con el tema Sistema la ventana queda exactamente como estaba antes de
-        que hubiera temas: sin banda y sin margenes propios, mimetizada con
-        Windows.
+        Con Claro y Oscuro la ventana queda como estaba antes de que hubiera
+        temas: sin banda y sin margenes propios, como una de Windows.
         """
         es_ads = tema == theme.ADS
         self._header.setVisible(es_ads)

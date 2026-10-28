@@ -38,6 +38,7 @@ MUTED = TEXT_MUTED
 
 #: Estados del arbol de contenido y de resultados. Mismo criterio.
 HOVER_BG = "#e8eef6"
+HOVER_BORDER = "#c3d2e4"
 SELECTED_INACTIVE_BG = "#ccdaea"
 ALT_ROW = "#fbfcfd"
 
@@ -71,6 +72,7 @@ def stylesheet() -> str:
         "surface_alt": SURFACE_ALT,
         "surface_code": SURFACE_CODE,
         "hover": HOVER_BG,
+        "hover_border": HOVER_BORDER,
         "sel_inactive": SELECTED_INACTIVE_BG,
         "alt_row": ALT_ROW,
     }
@@ -286,7 +288,23 @@ QStatusBar::item { border: none; }
 
 QMenuBar { background: %(surface_alt)s; }
 QMenuBar::item:selected { background: %(hover)s; color: %(primary_dark)s; }
-QMenu { background: %(surface)s; border: 1px solid %(border)s; }
-QMenu::item { padding: 5px 22px; }
-QMenu::item:selected { background: %(primary)s; color: %(on_primary)s; }
+/* Menus desplegables. La opcion bajo el raton va en un tono CLARO con texto
+   azul marino (11,5:1), igual que el arbol y la barra de menus: el azul
+   corporativo lleno se reserva para lo ELEGIDO, no para el paso del raton.
+   Mismo criterio que UtilitiesDevelopment. */
+QMenu { background: %(surface)s; border: 1px solid %(border)s; padding: 4px; }
+QMenu::item {
+    padding: 5px 22px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    color: %(text)s;
+    background: transparent;
+}
+QMenu::item:selected {
+    background: %(hover)s;
+    border-color: %(hover_border)s;
+    color: %(primary_dark)s;
+}
+QMenu::item:disabled { color: %(muted)s; }
+QMenu::separator { height: 1px; background: %(border)s; margin: 4px 6px; }
 """
