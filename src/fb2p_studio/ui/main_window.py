@@ -25,7 +25,7 @@ from PySide6.QtWidgets import (
 
 from fb2p_studio import __version__
 from fb2p_studio.core.settings import Settings
-from fb2p_studio.core.updates import DEFAULT_MANIFEST, UpdateChecker, UpdateInfo
+from fb2p_studio.core.updates import DEFAULT_SOURCE, UpdateChecker, UpdateInfo, is_url
 from fb2p_studio.ui import sidenav, theme
 from fb2p_studio.ui.dialog_preferences import PreferencesDialog
 from fb2p_studio.ui.sidenav import SideNav
@@ -233,8 +233,8 @@ class MainWindow(QMainWindow):
         self._margen.setContentsMargins(*((12, 10, 12, 12) if es_ads else (6, 6, 6, 6)))
 
     # ------------------------------------------------------------ updates
-    def _manifest_path(self) -> str:
-        return self._settings.update_manifest or DEFAULT_MANIFEST
+    def _update_source(self) -> str:
+        return self._settings.update_manifest or DEFAULT_SOURCE
 
     def _check_updates(self, *, quiet: bool) -> None:
         """`quiet=True` (arranque): sólo habla si hay novedad.
@@ -245,7 +245,7 @@ class MainWindow(QMainWindow):
         if self._checker is not None:
             return  # ya hay uno en curso
 
-        checker = UpdateChecker(self._manifest_path(), __version__, self)
+        checker = UpdateChecker(self._update_source(), __version__, self)
         checker.found.connect(lambda info: self._on_update_found(info, quiet=quiet))
         checker.up_to_date.connect(lambda v: self._on_up_to_date(v, quiet=quiet))
         checker.failed.connect(lambda motivo: self._on_update_failed(motivo, quiet=quiet))
@@ -294,7 +294,7 @@ class MainWindow(QMainWindow):
             self,
             self.tr("No se pudo verificar"),
             self.tr(
-                "No se pudo leer el manifiesto de versiones.\n\n{0}\n\n"
+                "No se pudo consultar la ultima version publicada.\n\n{0}\n\n"
                 "Se puede cambiar su ubicacion en Preferencias, al pie del menu lateral."
             ).format(motivo),
         )
@@ -316,23 +316,32 @@ class MainWindow(QMainWindow):
         box.setTextFormat(Qt.TextFormat.RichText)
         box.setText(texto)
 
-        carpeta = _carpeta_del_paquete(info.package)
-        if carpeta is not None:
+        destino = _destino_del_paquete(info.package)
+        if destino is not None:
             box.setInformativeText(self.tr("Paquete:\n{0}").format(info.package))
-            abrir = box.addButton(self.tr("Abrir carpeta"), QMessageBox.ButtonRole.AcceptRole)
+            # Una URL (el canal de GitHub) se baja desde el navegador; una ruta de
+            # red (un manifiesto del NAS) se abre en el explorador.
+            texto = self.tr("Descargar") if is_url(info.package) else self.tr("Abrir carpeta")
+            abrir = box.addButton(texto, QMessageBox.ButtonRole.AcceptRole)
         else:
             abrir = None
         box.addButton(self.tr("Cerrar"), QMessageBox.ButtonRole.RejectRole)
         box.exec()
 
-        if abrir is not None and box.clickedButton() is abrir and carpeta is not None:
-            QDesktopServices.openUrl(QUrl.fromLocalFile(str(carpeta)))
+        if abrir is not None and box.clickedButton() is abrir and destino is not None:
+            QDesktopServices.openUrl(destino)
 
 
-def _carpeta_del_paquete(package: str) -> Path | None:
-    """Carpeta contenedora del paquete, si el manifiesto trae una ruta usable."""
-    if not package.strip():
+def _destino_del_paquete(package: str) -> QUrl | None:
+    """Que abrir para conseguir el paquete: la URL tal cual, o la carpeta que lo contiene.
+
+    None si el origen no trae un paquete usable.
+    """
+    package = package.strip()
+    if not package:
         return None
+    if is_url(package):
+        return QUrl(package)
     p = Path(package)
     carpeta = p.parent if p.suffix else p
-    return carpeta if str(carpeta) not in (".", "") else None
+    return QUrl.fromLocalFile(str(carpeta)) if str(carpeta) not in (".", "") else None

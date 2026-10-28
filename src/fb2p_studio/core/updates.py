@@ -1,16 +1,19 @@
-"""Chequeo de version nueva contra un manifiesto en el NAS.
+"""Chequeo de version nueva contra el canal de distribucion en GitHub.
 
 No hay auto-update: Studio sólo avisa. Bajar e instalar lo hace la persona,
-copiando el .exe nuevo — coherente con que la app no tiene instalador.
+reemplazando el .exe — coherente con que la app no tiene instalador.
 
-**El manifiesto** es un JSON. Por defecto vive en la misma carpeta del NAS que
-el resto del compilado: no hace falta servidor, leer un archivo por SMB alcanza
-y la carpeta ya existe.
+**El canal** es el repo publico `Fenix-Corp/Utilities-Dist`, el mismo donde
+publican las Utilidades de Desarrollo. Cada version de Studio es un Release con
+la etiqueta `foxbin2prg-studio-vX.Y.Z` y el `FoxBin2Prg-Studio.exe` adjunto: lo
+sube `build_exe.bat` (ver `build\\publish.bat`). Como es publico, consultarlo no
+necesita token: se lee la API de GitHub sin autenticar. El prefijo propio evita
+confundirse con las etiquetas `fnxUtilidades-v*` del cajon, que viven en el
+mismo repo.
 
-Tambien acepta una **URL https**, para las maquinas que no ven el NAS (una
-laptop en un cliente). Los links de compartir de Google Drive y SharePoint se
-convierten solos a su forma de descarga directa (`normalize_source`), porque el
-link que se copia del navegador devuelve una pagina HTML y no el JSON.
+El origen se puede cambiar en Preferencias por cualquier otro repo de GitHub, o
+por un **manifiesto JSON** (carpeta de red o URL https), para las maquinas que no
+ven GitHub:
 
     {
       "version": "0.2.0",
@@ -18,10 +21,13 @@ link que se copia del navegador devuelve una pagina HTML y no el JSON.
       "notas": "Tab Proyecto + arbol de resultados."
     }
 
-Sólo `version` es obligatorio.
+Sólo `version` es obligatorio. Los links de compartir de Google Drive y
+SharePoint se convierten solos a su forma de descarga directa
+(`normalize_source`), porque el link que se copia del navegador devuelve una
+pagina HTML y no el JSON.
 
-Leer de un share de red puede colgarse varios segundos si el NAS no responde,
-asi que el chequeo NUNCA corre en el hilo de la UI: ver `UpdateChecker`.
+Consultar la red puede colgarse varios segundos, asi que el chequeo NUNCA corre
+en el hilo de la UI: ver `UpdateChecker`.
 """
 
 from __future__ import annotations
@@ -35,9 +41,22 @@ from pathlib import Path
 
 from PySide6.QtCore import QObject, QRunnable, QThreadPool, Signal
 
-#: Ubicacion por defecto del manifiesto. Se puede cambiar en Preferencias, y
-#: admite tanto una carpeta de red como una URL https.
-DEFAULT_MANIFEST = r"\\192.168.0.16\Compilado_16\FoxBin2Prg-Studio\latest.json"
+#: Origen por defecto de las actualizaciones: el repo de distribucion. Se puede
+#: cambiar en Preferencias; admite otro repo de GitHub, un manifiesto JSON en una
+#: carpeta de red o una URL https.
+DEFAULT_SOURCE = "https://github.com/Fenix-Corp/Utilities-Dist.git"
+
+#: Lo que identifica a Studio entre los Releases del canal (que comparte con
+#: otras utilidades): la etiqueta es `<prefijo><version>` y el asset, este nombre.
+#: `build\publish.bat` publica con los mismos valores: si cambian, cambian los dos.
+TAG_PREFIX = "foxbin2prg-studio-v"
+ASSET_NAME = "FoxBin2Prg-Studio.exe"
+
+#: `https://github.com/<dueno>/<repo>` con o sin `.git` (la forma de `git clone`).
+_RE_GITHUB = re.compile(
+    r"^https?://(?:www\.)?github\.com/(?P<owner>[\w.-]+)/(?P<repo>[\w.-]+?)(?:\.git)?/?$",
+    re.IGNORECASE,
+)
 
 #: `https://drive.google.com/file/d/<ID>/view?usp=sharing` es lo que se copia
 #: del navegador; el ID es lo unico que sirve para armar la descarga directa.
@@ -52,6 +71,10 @@ TIMEOUT_HTTP = 12.0
 #: Un manifiesto son unos cientos de bytes. Pasado esto, lo que llego no es un
 #: manifiesto (tipicamente, la pagina del visor de Drive o un login).
 _MAX_BYTES = 64 * 1024
+
+#: La lista de Releases trae los assets de cada uno (el repo comparte canal con
+#: otras utilidades, ~9 binarios por Release): pesa cientos de KB, no unos bytes.
+_MAX_BYTES_RELEASES = 4 * 1024 * 1024
 
 
 @dataclass(slots=True, frozen=True)
@@ -108,8 +131,66 @@ def parse_manifest(raw: str) -> UpdateInfo:
     )
 
 
+def parse_releases(raw: str) -> UpdateInfo:
+    """La version mas nueva de Studio entre los Releases que devuelve GitHub.
+
+    Ignora borradores, pre-releases y toda etiqueta que no empiece por
+    `TAG_PREFIX` (el canal es compartido). El paquete es la URL de descarga del
+    `.exe` adjunto; si el Release no lo trae, la pagina del Release. Lanza
+    `ValueError` si no hay ninguna version de Studio publicada.
+    """
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"GitHub no devolvio JSON valido: {e}") from e
+
+    if not isinstance(data, list):
+        raise ValueError("GitHub no devolvio una lista de releases")
+
+    mejor: tuple[str, dict] | None = None
+    for release in data:
+        if not isinstance(release, dict) or release.get("draft") or release.get("prerelease"):
+            continue
+        tag = str(release.get("tag_name", "")).strip()
+        if not tag.lower().startswith(TAG_PREFIX):
+            continue
+        version = tag[len(TAG_PREFIX) :]
+        if not parse_version(version):
+            continue
+        if mejor is None or is_newer(version, mejor[0]):
+            mejor = (version, release)
+
+    if mejor is None:
+        raise ValueError("el canal no tiene ninguna version publicada de FoxBin2Prg-Studio")
+
+    version, release = mejor
+    return UpdateInfo(
+        version=version,
+        package=_asset_url(release),
+        notes=str(release.get("body") or "").strip(),
+    )
+
+
+def _asset_url(release: dict) -> str:
+    """URL de descarga del `.exe` del Release; la del Release si no lo trae."""
+    for asset in release.get("assets") or []:
+        if isinstance(asset, dict) and str(asset.get("name", "")).lower() == ASSET_NAME.lower():
+            return str(asset.get("browser_download_url", "")).strip()
+    return str(release.get("html_url", "")).strip()
+
+
+def parse_github_repo(origen: str) -> tuple[str, str] | None:
+    """`(dueno, repo)` si el origen es un repo de GitHub, o None.
+
+    Acepta la URL de la pagina (`https://github.com/Fenix-Corp/Utilities-Dist`) y
+    la de `git clone` (con `.git`).
+    """
+    m = _RE_GITHUB.match(origen.strip())
+    return (m.group("owner"), m.group("repo")) if m else None
+
+
 def is_url(origen: str) -> bool:
-    """Si el manifiesto esta en la web en vez de en una carpeta."""
+    """Si el origen esta en la web en vez de en una carpeta."""
     return origen.strip().lower().startswith(("http://", "https://"))
 
 
@@ -132,39 +213,54 @@ def normalize_source(origen: str) -> str:
     return origen
 
 
-def read_manifest(manifest_path: str | Path) -> UpdateInfo:
-    """Lee y parsea el manifiesto, este en una carpeta o en la web.
+def read_manifest(origen: str | Path) -> UpdateInfo:
+    """Lee la ultima version publicada, venga de GitHub, de la web o de una carpeta.
 
-    Lanza `OSError` si no se pudo traer (NAS caido, sin red, 404) y
-    `ValueError` si lo que llego no es un manifiesto valido.
+    Un repo de GitHub se consulta por su API de Releases; cualquier otra URL o
+    ruta se lee como manifiesto JSON.
+
+    Lanza `OSError` si no se pudo traer (sin red, 404, NAS caido) y `ValueError`
+    si lo que llego no sirve (JSON roto, sin version publicada).
 
     Bloqueante: no llamarla desde el hilo de la UI (usar `UpdateChecker`).
     """
-    origen = str(manifest_path)
+    origen = str(origen)
+    repo = parse_github_repo(origen)
+    if repo is not None:
+        url = f"https://api.github.com/repos/{repo[0]}/{repo[1]}/releases?per_page=100"
+        return parse_releases(_fetch_url(url, max_bytes=_MAX_BYTES_RELEASES, api=True))
     crudo = _fetch_url(origen) if is_url(origen) else Path(origen).read_text(encoding="utf-8")
     return parse_manifest(crudo)
 
 
-def _fetch_url(url: str) -> str:
-    """Trae el manifiesto por HTTP. Los errores salen como `OSError`.
+def _fetch_url(url: str, *, max_bytes: int = _MAX_BYTES, api: bool = False) -> str:
+    """Trae el contenido por HTTP. Los errores salen como `OSError`.
 
     `urllib` ya levanta `URLError`/`HTTPError`, que son `OSError`, asi que el
     llamador no distingue entre "el NAS no responde" y "el servidor devolvio
     404": las dos cosas se reportan igual.
     """
+    cabeceras = {"User-Agent": "FoxBin2Prg-Studio"}
+    if api:
+        cabeceras["Accept"] = "application/vnd.github+json"
+        cabeceras["X-GitHub-Api-Version"] = "2022-11-28"
     peticion = urllib.request.Request(  # noqa: S310 — el esquema se valido en is_url()
         normalize_source(url),
-        headers={"User-Agent": "FoxBin2Prg-Studio"},
+        headers=cabeceras,
     )
     try:
         with urllib.request.urlopen(peticion, timeout=TIMEOUT_HTTP) as respuesta:  # noqa: S310
-            datos = respuesta.read(_MAX_BYTES + 1)
+            datos = respuesta.read(max_bytes + 1)
     except urllib.error.HTTPError as e:
+        if api and e.code in (403, 429):
+            # Sin token GitHub deja 60 consultas por hora y por IP: en una red
+            # compartida (la oficina entera sale por una IP) se agota.
+            raise OSError("GitHub limito las consultas desde esta red; reintenta mas tarde") from e
         raise OSError(f"el servidor respondio {e.code} {e.reason}") from e
     except urllib.error.URLError as e:
         raise OSError(f"no se pudo conectar: {e.reason}") from e
 
-    if len(datos) > _MAX_BYTES:
+    if len(datos) > max_bytes:
         # Casi siempre significa que la URL devolvio una pagina HTML (un visor,
         # un login) en vez del JSON. Decirlo asi ahorra media hora de confusion.
         raise ValueError(

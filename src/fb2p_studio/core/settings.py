@@ -42,7 +42,11 @@ class Settings:
     # --- actualizaciones ---
     @property
     def update_manifest(self) -> str:
-        """Ruta al manifiesto de version. Vacio = usar el default del NAS."""
+        """Origen de las actualizaciones. Vacio = el canal por defecto (`updates.DEFAULT_SOURCE`).
+
+        Conserva la clave `updates/manifest` de cuando solo era un manifiesto en el NAS:
+        un .ini viejo sigue funcionando.
+        """
         return str(self._s.value("updates/manifest", "", type=str))
 
     @update_manifest.setter

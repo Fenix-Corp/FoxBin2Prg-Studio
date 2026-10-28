@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (
 
 from fb2p_studio.core.discovery import find_fb2p_home, find_vfp_exe
 from fb2p_studio.core.settings import Settings
-from fb2p_studio.core.updates import DEFAULT_MANIFEST
+from fb2p_studio.core.updates import DEFAULT_SOURCE
 from fb2p_studio.ui import theme
 from fb2p_studio.ui.widgets.path_picker import PathPicker
 
@@ -71,7 +71,7 @@ class PreferencesDialog(QDialog):
 
         self._manifest = PathPicker(
             mode="file",
-            placeholder=self.tr("(por defecto) {0}").format(DEFAULT_MANIFEST),
+            placeholder=self.tr("(por defecto) {0}").format(DEFAULT_SOURCE),
             file_filter=self.tr("Manifiesto (*.json);;Todos (*.*)"),
         )
         self._manifest.set_value(settings.update_manifest)
@@ -84,7 +84,7 @@ class PreferencesDialog(QDialog):
         form.addRow(self.tr("vfp9.exe:"), self._vfp)
         form.addRow(self.tr("FoxBin2Prg (carpeta):"), self._fb2p)
         form.addRow(_separador())
-        form.addRow(self.tr("Manifiesto de versiones:"), self._manifest)
+        form.addRow(self.tr("Origen de actualizaciones:"), self._manifest)
         form.addRow("", self._chk_updates)
 
         hint = QLabel(
@@ -94,8 +94,10 @@ class PreferencesDialog(QDialog):
                 "viene embebido en el propio Studio.<br>"
                 "Escribir una ruta la fija como override y la persiste en QSettings. "
                 "Si mas adelante esa ruta no existe, se ignora y se vuelve a la autodeteccion.<br><br>"
-                "El <b>manifiesto de versiones</b> es un JSON en la red que dice cual es la "
-                "ultima version publicada. Studio sólo avisa: no descarga ni instala nada.<br><br>"
+                "El <b>origen de actualizaciones</b> es, por defecto, el repo de distribucion "
+                "en GitHub (el mismo de las demas utilidades): ahi publica cada compilacion su "
+                ".exe. Se puede apuntar a otro repo de GitHub o a un manifiesto JSON en la red. "
+                "Studio sólo avisa y ofrece el enlace de descarga: no instala nada.<br><br>"
                 "El <b>tema</b> se aplica al instante, sin reiniciar."
             )
         )

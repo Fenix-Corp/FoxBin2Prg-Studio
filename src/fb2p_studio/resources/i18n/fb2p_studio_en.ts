@@ -114,108 +114,108 @@
 <context>
     <name>ConvertTab</name>
     <message>
-        <location filename="../../ui/tab_convert.py" line="47"/>
+        <location filename="../../ui/tab_convert.py" line="48"/>
         <source>Ruta al archivo binario o de texto</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="49"/>
+        <location filename="../../ui/tab_convert.py" line="50"/>
         <source>FoxBin2Prg (*.scx *.vcx *.pjx *.frx *.lbx *.mnx *.dbc *.dbf *.sc2 *.vc2 *.pj2 *.fr2 *.lb2 *.mn2 *.dc2 *.db2);;Todos (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="55"/>
+        <location filename="../../ui/tab_convert.py" line="56"/>
         <source>Auto (por extension)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="56"/>
+        <location filename="../../ui/tab_convert.py" line="57"/>
         <source>Bin -&gt; Prg</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="57"/>
+        <location filename="../../ui/tab_convert.py" line="58"/>
         <source>Prg -&gt; Bin</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="68"/>
+        <location filename="../../ui/tab_convert.py" line="69"/>
         <source>Archivo:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="69"/>
+        <location filename="../../ui/tab_convert.py" line="70"/>
         <source>Operacion:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="76"/>
+        <location filename="../../ui/tab_convert.py" line="77"/>
         <source>Ejecutar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="79"/>
+        <location filename="../../ui/tab_convert.py" line="80"/>
         <source>Cancelar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="93"/>
+        <location filename="../../ui/tab_convert.py" line="96"/>
         <source>Resultados</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="94"/>
+        <location filename="../../ui/tab_convert.py" line="97"/>
         <source>Log</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="105"/>
+        <location filename="../../ui/tab_convert.py" line="109"/>
         <source>job.ini (preview):</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="164"/>
+        <location filename="../../ui/tab_convert.py" line="172"/>
         <source>Extension no reconocida: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="171"/>
+        <location filename="../../ui/tab_convert.py" line="179"/>
         <source>Falta origen</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="171"/>
+        <location filename="../../ui/tab_convert.py" line="179"/>
         <source>Seleccioná un archivo de origen.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="177"/>
+        <location filename="../../ui/tab_convert.py" line="185"/>
         <source>Origen inexistente</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="178"/>
+        <location filename="../../ui/tab_convert.py" line="186"/>
         <source>No existe:
 {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="185"/>
+        <location filename="../../ui/tab_convert.py" line="193"/>
         <source>Direccion desconocida</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="186"/>
+        <location filename="../../ui/tab_convert.py" line="194"/>
         <source>La extension no permite decidir auto. Elegí Bin-&gt;Prg o Prg-&gt;Bin.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="195"/>
+        <location filename="../../ui/tab_convert.py" line="203"/>
         <source>Conversion no soportada</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="197"/>
+        <location filename="../../ui/tab_convert.py" line="205"/>
         <source>FoxBin2Prg no convierte este archivo en esa direccion, asi que lo saltearia sin avisar.
 
 {0}
@@ -224,7 +224,7 @@ Si es un .db2 / .fk2 / .me2, se habilita poniendo n_XXX_Conversion_Support=2 en 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_convert.py" line="207"/>
+        <location filename="../../ui/tab_convert.py" line="215"/>
         <source>» Ejecutando {0} sobre {1}</source>
         <translation type="unfinished"></translation>
     </message>
@@ -232,47 +232,47 @@ Si es un .db2 / .fk2 / .me2, se habilita poniendo n_XXX_Conversion_Support=2 en 
 <context>
     <name>JobRunner</name>
     <message>
-        <location filename="../../ui/job_runner.py" line="69"/>
+        <location filename="../../ui/job_runner.py" line="72"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/job_runner.py" line="75"/>
+        <location filename="../../ui/job_runner.py" line="78"/>
         <source>No se pudo lanzar el bridge</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/job_runner.py" line="101"/>
+        <location filename="../../ui/job_runner.py" line="105"/>
         <source>» Cancelacion solicitada (se aplica entre operaciones)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/job_runner.py" line="108"/>
+        <location filename="../../ui/job_runner.py" line="112"/>
         <source>VFP {0} · FoxBin2Prg {1} · {2} op(s) · dryRun={3}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/job_runner.py" line="143"/>
+        <location filename="../../ui/job_runner.py" line="152"/>
         <source>#{0} en linea {1}: {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/job_runner.py" line="147"/>
+        <location filename="../../ui/job_runner.py" line="156"/>
         <source>    codigo: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/job_runner.py" line="149"/>
+        <location filename="../../ui/job_runner.py" line="158"/>
         <source>    detalle: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/job_runner.py" line="163"/>
+        <location filename="../../ui/job_runner.py" line="172"/>
         <source>= cancelado tras {0} operacion(es)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/job_runner.py" line="173"/>
+        <location filename="../../ui/job_runner.py" line="182"/>
         <source>» vfp9.exe termino con exit code {0}</source>
         <translation type="unfinished"></translation>
     </message>
@@ -303,127 +303,133 @@ Si es un .db2 / .fk2 / .me2, se habilita poniendo n_XXX_Conversion_Support=2 en 
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../../ui/main_window.py" line="47"/>
+        <location filename="../../ui/main_window.py" line="124"/>
         <source>Convertir</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="48"/>
+        <location filename="../../ui/main_window.py" line="125"/>
         <source>Proyecto</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="49"/>
+        <location filename="../../ui/main_window.py" line="126"/>
         <source>Acerca de</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="75"/>
+        <location filename="../../ui/main_window.py" line="101"/>
         <source>Listo</source>
+        <extracomment>Glifos de Segoe Fluent Icons / MDL2 de cada opcion del menu lateral.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="86"/>
-        <source>&amp;Archivo</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../ui/main_window.py" line="87"/>
-        <source>Salir</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../ui/main_window.py" line="92"/>
-        <source>&amp;Herramientas</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../ui/main_window.py" line="93"/>
+        <location filename="../../ui/main_window.py" line="161"/>
         <source>Preferencias...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="97"/>
-        <source>A&amp;yuda</source>
+        <location filename="../../ui/main_window.py" line="122"/>
+        <source>Herramientas</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="98"/>
-        <source>Buscar actualizaciones...</source>
+        <location filename="../../ui/main_window.py" line="158"/>
+        <source>Preferencias</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="109"/>
-        <source>Preferencias actualizadas</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../ui/main_window.py" line="157"/>
-        <source>Buscando actualizaciones...</source>
+        <location filename="../../ui/main_window.py" line="159"/>
+        <source>Tema</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="164"/>
-        <source>Hay una version nueva: {0}</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../ui/main_window.py" line="174"/>
-        <source>Hay una version nueva de FoxBin2Prg-Studio: {0}</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../ui/main_window.py" line="176"/>
-        <source>Ver</source>
+        <source>Buscar actualizaciones...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="187"/>
+        <source>Tema: {0}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/main_window.py" line="196"/>
+        <source>Preferencias actualizadas</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/main_window.py" line="255"/>
+        <source>Buscando actualizaciones...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/main_window.py" line="262"/>
+        <source>Hay una version nueva: {0}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/main_window.py" line="272"/>
+        <source>Hay una version nueva de FoxBin2Prg-Studio: {0}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/main_window.py" line="274"/>
+        <source>Ver</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/main_window.py" line="285"/>
         <source>Sin actualizaciones</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="188"/>
+        <location filename="../../ui/main_window.py" line="286"/>
         <source>Estas en la ultima version publicada ({0}).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="197"/>
+        <location filename="../../ui/main_window.py" line="295"/>
         <source>No se pudo verificar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="199"/>
-        <source>No se pudo leer el manifiesto de versiones.
+        <location filename="../../ui/main_window.py" line="297"/>
+        <source>No se pudo consultar la ultima version publicada.
 
 {0}
 
-Se puede cambiar su ubicacion en Herramientas &gt; Preferencias.</source>
+Se puede cambiar su ubicacion en Preferencias, al pie del menu lateral.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="209"/>
+        <location filename="../../ui/main_window.py" line="307"/>
         <source>Hay una version nueva: &lt;b&gt;{0}&lt;/b&gt; (tenes la {1}).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="216"/>
+        <location filename="../../ui/main_window.py" line="314"/>
         <source>Actualizacion disponible</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="223"/>
+        <location filename="../../ui/main_window.py" line="321"/>
         <source>Paquete:
 {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="224"/>
+        <location filename="../../ui/main_window.py" line="324"/>
         <source>Abrir carpeta</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="227"/>
+        <location filename="../../ui/main_window.py" line="324"/>
+        <source>Descargar</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/main_window.py" line="328"/>
         <source>Cerrar</source>
         <translation type="unfinished"></translation>
     </message>
@@ -469,43 +475,43 @@ Se puede cambiar su ubicacion en Herramientas &gt; Preferencias.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/dialog_preferences.py" line="72"/>
+        <location filename="../../ui/dialog_preferences.py" line="74"/>
         <source>(por defecto) {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/dialog_preferences.py" line="73"/>
+        <location filename="../../ui/dialog_preferences.py" line="75"/>
         <source>Manifiesto (*.json);;Todos (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/dialog_preferences.py" line="76"/>
+        <location filename="../../ui/dialog_preferences.py" line="78"/>
         <source>Buscar actualizaciones al arrancar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/dialog_preferences.py" line="80"/>
+        <location filename="../../ui/dialog_preferences.py" line="82"/>
         <source>Tema:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/dialog_preferences.py" line="82"/>
+        <location filename="../../ui/dialog_preferences.py" line="84"/>
         <source>vfp9.exe:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/dialog_preferences.py" line="83"/>
+        <location filename="../../ui/dialog_preferences.py" line="85"/>
         <source>FoxBin2Prg (carpeta):</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/dialog_preferences.py" line="85"/>
-        <source>Manifiesto de versiones:</source>
+        <location filename="../../ui/dialog_preferences.py" line="87"/>
+        <source>Origen de actualizaciones:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/dialog_preferences.py" line="90"/>
-        <source>Dejar un campo &lt;b&gt;vacio&lt;/b&gt; = autodeteccion (lo que muestra el texto gris): variables VFP_EXE / FB2P_HOME, rutas tipicas y, para FoxBin2Prg, el que viene embebido en el propio Studio.&lt;br&gt;Escribir una ruta la fija como override y la persiste en QSettings. Si mas adelante esa ruta no existe, se ignora y se vuelve a la autodeteccion.&lt;br&gt;&lt;br&gt;El &lt;b&gt;manifiesto de versiones&lt;/b&gt; es un JSON en la red que dice cual es la ultima version publicada. Studio sólo avisa: no descarga ni instala nada.&lt;br&gt;&lt;br&gt;El &lt;b&gt;tema&lt;/b&gt; se aplica al instante, sin reiniciar.</source>
+        <location filename="../../ui/dialog_preferences.py" line="92"/>
+        <source>Dejar un campo &lt;b&gt;vacio&lt;/b&gt; = autodeteccion (lo que muestra el texto gris): variables VFP_EXE / FB2P_HOME, rutas tipicas y, para FoxBin2Prg, el que viene embebido en el propio Studio.&lt;br&gt;Escribir una ruta la fija como override y la persiste en QSettings. Si mas adelante esa ruta no existe, se ignora y se vuelve a la autodeteccion.&lt;br&gt;&lt;br&gt;El &lt;b&gt;origen de actualizaciones&lt;/b&gt; es, por defecto, el repo de distribucion en GitHub (el mismo de las demas utilidades): ahi publica cada compilacion su .exe. Se puede apuntar a otro repo de GitHub o a un manifiesto JSON en la red. Studio sólo avisa y ofrece el enlace de descarga: no instala nada.&lt;br&gt;&lt;br&gt;El &lt;b&gt;tema&lt;/b&gt; se aplica al instante, sin reiniciar.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -636,138 +642,138 @@ Se puede cambiar su ubicacion en Herramientas &gt; Preferencias.</source>
 <context>
     <name>ProjectTab</name>
     <message>
-        <location filename="../../ui/tab_project.py" line="75"/>
+        <location filename="../../ui/tab_project.py" line="76"/>
         <source>Ruta al .pjx (a texto) o al .pj2 (a binario)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="76"/>
+        <location filename="../../ui/tab_project.py" line="77"/>
         <source>Proyecto VFP (*.pjx *.pj2);;Todos (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="85"/>
+        <location filename="../../ui/tab_project.py" line="86"/>
         <source>Incluir el propio archivo de proyecto en el lote</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="90"/>
+        <location filename="../../ui/tab_project.py" line="91"/>
         <source>Marcado envia cType «*»; desmarcado, «*-», que procesa los archivos del proyecto pero deja el .pjx/.pj2 sin tocar.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="98"/>
+        <location filename="../../ui/tab_project.py" line="99"/>
         <source>Recompilar desde la carpeta del proyecto</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="103"/>
+        <location filename="../../ui/tab_project.py" line="104"/>
         <source>FoxBin2Prg recompila desde la carpeta de cada archivo, lo que rompe las rutas relativas (los #include, tipicamente). Con esto se le pasa la carpeta del proyecto como base.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="111"/>
+        <location filename="../../ui/tab_project.py" line="112"/>
         <source>Proyecto:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="112"/>
+        <location filename="../../ui/tab_project.py" line="113"/>
         <source>Operacion:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="123"/>
+        <location filename="../../ui/tab_project.py" line="124"/>
         <source>Contenido</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="124"/>
+        <location filename="../../ui/tab_project.py" line="125"/>
         <source>job.ini</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="126"/>
+        <location filename="../../ui/tab_project.py" line="127"/>
         <source>Ejecutar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="129"/>
+        <location filename="../../ui/tab_project.py" line="130"/>
         <source>Cancelar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="142"/>
+        <location filename="../../ui/tab_project.py" line="145"/>
         <source>Resultados</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="143"/>
+        <location filename="../../ui/tab_project.py" line="146"/>
         <source>Log</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="181"/>
+        <location filename="../../ui/tab_project.py" line="189"/>
         <source>&lt;i&gt;Elegí un proyecto para ver la operacion.&lt;/i&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="184"/>
+        <location filename="../../ui/tab_project.py" line="192"/>
         <source>&lt;b&gt;Bin → Prg&lt;/b&gt; — el proyecto y sus archivos pasan a texto.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="186"/>
+        <location filename="../../ui/tab_project.py" line="194"/>
         <source>&lt;b&gt;Prg → Bin&lt;/b&gt; — el texto del proyecto vuelve a binario.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="188"/>
+        <location filename="../../ui/tab_project.py" line="196"/>
         <source>&lt;b&gt;No es un proyecto.&lt;/b&gt; Este modo sólo acepta &lt;code&gt;.pjx&lt;/code&gt; o &lt;code&gt;.pj2&lt;/code&gt;; para un archivo suelto está la pestaña Convertir.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="225"/>
+        <location filename="../../ui/tab_project.py" line="233"/>
         <source>Elegí un proyecto para ver su contenido.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="228"/>
+        <location filename="../../ui/tab_project.py" line="236"/>
         <source>Sólo se puede listar un .pjx o un .pj2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="231"/>
+        <location filename="../../ui/tab_project.py" line="239"/>
         <source>El archivo todavía no existe.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="267"/>
+        <location filename="../../ui/tab_project.py" line="275"/>
         <source>Falta el proyecto</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="267"/>
+        <location filename="../../ui/tab_project.py" line="275"/>
         <source>Seleccioná un .pjx o un .pj2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="272"/>
+        <location filename="../../ui/tab_project.py" line="280"/>
         <source>Proyecto inexistente</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="272"/>
+        <location filename="../../ui/tab_project.py" line="280"/>
         <source>No existe:
 {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="278"/>
+        <location filename="../../ui/tab_project.py" line="286"/>
         <source>No es un proyecto</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="280"/>
+        <location filename="../../ui/tab_project.py" line="288"/>
         <source>FoxBin2Prg sólo procesa un lote completo cuando el archivo es un .pjx o un .pj2.
 
 Recibido: {0}
@@ -776,42 +782,42 @@ Para un archivo suelto, usá la pestaña Convertir.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="295"/>
+        <location filename="../../ui/tab_project.py" line="303"/>
         <source>incluyendo el archivo de proyecto</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="297"/>
+        <location filename="../../ui/tab_project.py" line="305"/>
         <source>sin el archivo de proyecto</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="300"/>
+        <location filename="../../ui/tab_project.py" line="308"/>
         <source>» Proyecto completo: {0} ({1})</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="304"/>
+        <location filename="../../ui/tab_project.py" line="312"/>
         <source>» {0} archivo(s) a convertir de {1} en el proyecto</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="311"/>
+        <location filename="../../ui/tab_project.py" line="319"/>
         <source>  · FALTA, se saltea: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="326"/>
+        <location filename="../../ui/tab_project.py" line="334"/>
         <source>  · ... y {0} mas</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="330"/>
+        <location filename="../../ui/tab_project.py" line="338"/>
         <source>Faltan archivos del proyecto</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/tab_project.py" line="332"/>
+        <location filename="../../ui/tab_project.py" line="340"/>
         <source>{0} archivo(s) que el proyecto declara no están en disco. FoxBin2Prg los saltea sin avisar:
 
 {1}
@@ -947,6 +953,20 @@ Para un archivo suelto, usá la pestaña Convertir.</source>
     <message>
         <location filename="../../ui/widgets/results_view.py" line="241"/>
         <source>{0} operacion(es), {1} archivo(s) · {2} con error · {3}</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>SideNav</name>
+    <message>
+        <location filename="../../ui/sidenav.py" line="155"/>
+        <source>Contraer menu</source>
+        <extracomment>Fuentes de iconos, en orden de preferencia. Archivo de cada fuente en %WINDIR%Fonts, por si Qt no la ve sola. Glifos de la barra misma. Los de cada pagina se declaran al construirla. Indice de la pagina elegida, en el orden en que se agregaron. (boton, glifo) de todo lo que lleva icono, para repintarlo al cambiar de tema. (titulo visible, separador) de cada grupo: colapsada se ve el separador en lugar del titulo. Grupo y titulo de cada pagina, para el encabezado de la seccion.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/sidenav.py" line="156"/>
+        <source>Expandir menu</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

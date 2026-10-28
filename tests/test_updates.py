@@ -7,12 +7,18 @@ from pathlib import Path
 
 import pytest
 
+from fb2p_studio.core import updates
 from fb2p_studio.core.updates import (
+    ASSET_NAME,
+    DEFAULT_SOURCE,
+    TAG_PREFIX,
     UpdateInfo,
     is_newer,
     is_url,
     normalize_source,
+    parse_github_repo,
     parse_manifest,
+    parse_releases,
     parse_version,
     read_manifest,
 )
@@ -148,3 +154,161 @@ def test_sharepoint_no_se_duplica() -> None:
 )
 def test_lo_que_no_reconoce_lo_deja_igual(origen: str) -> None:
     assert normalize_source(origen) == origen
+
+
+# ------------------------------------------------------------- canal de GitHub
+def _release(tag: str, *, assets: list[str] | None = None, **extra: object) -> dict:
+    """Un Release como lo devuelve la API de GitHub, con lo que lee `parse_releases`."""
+    return {
+        "tag_name": tag,
+        "html_url": f"https://github.com/Fenix-Corp/Utilities-Dist/releases/tag/{tag}",
+        "body": "",
+        "draft": False,
+        "prerelease": False,
+        "assets": [
+            {"name": n, "browser_download_url": f"https://github.com/dl/{tag}/{n}"}
+            for n in (assets if assets is not None else [ASSET_NAME])
+        ],
+        **extra,
+    }
+
+
+@pytest.mark.parametrize(
+    "origen",
+    [
+        "https://github.com/Fenix-Corp/Utilities-Dist.git",
+        "https://github.com/Fenix-Corp/Utilities-Dist",
+        "https://github.com/Fenix-Corp/Utilities-Dist/",
+        "HTTPS://GitHub.com/Fenix-Corp/Utilities-Dist.git",
+        "  https://github.com/Fenix-Corp/Utilities-Dist.git  ",
+    ],
+)
+def test_parse_github_repo_acepta_la_pagina_y_la_url_de_clone(origen: str) -> None:
+    assert parse_github_repo(origen) == ("Fenix-Corp", "Utilities-Dist")
+
+
+@pytest.mark.parametrize(
+    "origen",
+    [
+        "https://interno.ads/latest.json",
+        "https://github.com/Fenix-Corp",  # sin repo
+        "https://github.com/Fenix-Corp/Utilities-Dist/releases",  # otra pagina
+        "https://gitlab.com/Fenix-Corp/Utilities-Dist.git",
+        r"\\192.168.0.16\Compilado_16\latest.json",
+        "",
+    ],
+)
+def test_parse_github_repo_rechaza_lo_que_no_es_un_repo(origen: str) -> None:
+    assert parse_github_repo(origen) is None
+
+
+def test_el_origen_por_defecto_es_el_repo_de_distribucion() -> None:
+    assert parse_github_repo(DEFAULT_SOURCE) == ("Fenix-Corp", "Utilities-Dist")
+
+
+def test_parse_releases_toma_la_version_mas_nueva() -> None:
+    raw = json.dumps(
+        [
+            _release(TAG_PREFIX + "0.2.0"),
+            _release(TAG_PREFIX + "0.10.0", body="  Menu lateral.  "),
+            _release(TAG_PREFIX + "0.9.5"),
+        ]
+    )
+    info = parse_releases(raw)
+
+    assert info.version == "0.10.0"  # 0.10 > 0.9: se compara por numeros, no por texto
+    assert info.notes == "Menu lateral."
+    assert info.package == f"https://github.com/dl/{TAG_PREFIX}0.10.0/{ASSET_NAME}"
+
+
+def test_parse_releases_ignora_las_etiquetas_de_otras_utilidades() -> None:
+    """El canal es compartido: fnxUtilidades-v9.9.9 no es una version de Studio."""
+    raw = json.dumps(
+        [_release("fnxUtilidades-v9.9.9"), _release(TAG_PREFIX + "0.1.1"), _release("otra-v5.0.0")]
+    )
+    assert parse_releases(raw).version == "0.1.1"
+
+
+def test_parse_releases_ignora_borradores_y_prereleases() -> None:
+    raw = json.dumps(
+        [
+            _release(TAG_PREFIX + "0.3.0", draft=True),
+            _release(TAG_PREFIX + "0.2.0", prerelease=True),
+            _release(TAG_PREFIX + "0.1.1"),
+        ]
+    )
+    assert parse_releases(raw).version == "0.1.1"
+
+
+def test_parse_releases_sin_el_exe_cae_a_la_pagina_del_release() -> None:
+    info = parse_releases(json.dumps([_release(TAG_PREFIX + "0.2.0", assets=["otro.zip"])]))
+    assert info.package == f"https://github.com/Fenix-Corp/Utilities-Dist/releases/tag/{TAG_PREFIX}0.2.0"
+
+
+def test_parse_releases_elige_el_asset_por_nombre() -> None:
+    info = parse_releases(
+        json.dumps([_release(TAG_PREFIX + "0.2.0", assets=["Otro.exe", ASSET_NAME.lower()])])
+    )
+    assert info.package.endswith("/" + ASSET_NAME.lower())  # sin distinguir mayusculas
+
+
+@pytest.mark.parametrize(
+    "crudo",
+    [
+        "no soy json",
+        '{"message": "Not Found"}',  # error de la API: es un objeto, no una lista
+        "[]",  # canal sin releases
+        json.dumps([_release("fnxUtilidades-v1.1.1")]),  # solo hay de otras utilidades
+        json.dumps([_release(TAG_PREFIX + "nada")]),  # version ilegible
+    ],
+)
+def test_parse_releases_invalido_o_sin_version_de_studio(crudo: str) -> None:
+    with pytest.raises(ValueError):
+        parse_releases(crudo)
+
+
+def test_read_manifest_de_un_repo_consulta_la_api_de_releases(monkeypatch: pytest.MonkeyPatch) -> None:
+    pedidos: list[tuple[str, dict]] = []
+
+    def falso(url: str, **kw: object) -> str:
+        pedidos.append((url, kw))
+        return json.dumps([_release(TAG_PREFIX + "0.4.0")])
+
+    monkeypatch.setattr(updates, "_fetch_url", falso)
+
+    assert read_manifest(DEFAULT_SOURCE).version == "0.4.0"
+    url, kw = pedidos[0]
+    assert url.startswith("https://api.github.com/repos/Fenix-Corp/Utilities-Dist/releases")
+    assert kw["api"] is True
+    assert kw["max_bytes"] > 64 * 1024  # la lista de releases pesa mas que un manifiesto
+
+
+def test_read_manifest_de_una_url_cualquiera_sigue_siendo_un_manifiesto(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(updates, "_fetch_url", lambda url, **kw: '{"version": "7.0.0"}')
+    assert read_manifest("https://interno.ads/latest.json").version == "7.0.0"
+
+
+@pytest.mark.parametrize(
+    ("paquete", "esperado"),
+    [
+        ("https://github.com/dl/x.exe", "https://github.com/dl/x.exe"),
+        ("", None),
+        ("   ", None),
+    ],
+)
+def test_destino_del_paquete(paquete: str, esperado: str | None) -> None:
+    from fb2p_studio.ui.main_window import _destino_del_paquete
+
+    destino = _destino_del_paquete(paquete)
+    assert (destino.toString() if destino is not None else None) == esperado
+
+
+def test_destino_del_paquete_de_una_ruta_de_red_abre_la_carpeta() -> None:
+    from fb2p_studio.ui.main_window import _destino_del_paquete
+
+    destino = _destino_del_paquete("C:/Compilado/Studio-0.2.0.zip")
+    assert destino is not None
+    assert destino.isLocalFile()
+    assert destino.toLocalFile().replace("\\", "/").endswith("Compilado")
