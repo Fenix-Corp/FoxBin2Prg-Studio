@@ -136,15 +136,27 @@ Cada versión de Studio es un Release de ese repo, con la etiqueta `foxbin2prg-s
 
 #### La versión
 
-**La compilación no asigna una versión nueva**: se sube a propósito, como en UtilitiesDevelopment (`APP_VERSION`), porque es lo que el lanzador compara para decidir si bajar. Vive en **un solo sitio**, `__version__` en `src/fb2p_studio/__init__.py`; `pyproject.toml` la lee de ahí (`dynamic`) y los `.bat` se la piden a `build/version.py`. Un `.exe` nuevo con la **misma** versión no llega al equipo.
+**La compilación, por sí sola, no cambia la versión**: la sube una persona, como en UtilitiesDevelopment (`APP_VERSION`), porque es lo que el lanzador compara para decidir si bajar. Vive en **un solo sitio**, `__version__` en `src/fb2p_studio/__init__.py`; `pyproject.toml` la lee de ahí (`dynamic`) y los `.bat` se la piden a `build/version.py`. Un `.exe` nuevo con la **misma** versión no llega al equipo.
+
+**Al ejecutar `build_exe.bat` sin parámetros, con consola, pregunta**:
+
+```
+Version actual: 0.1.0
+Subir la version?  Enter/P = patch (0.1.1)  |  M = minor (0.2.0)  |  J = major (1.0.0)  |  N = dejarla:
+```
+
+Enter sube el parche. Una respuesta que no se entiende, `N` o cerrar la entrada **dejan la versión como está**: ante la duda no se publica una versión nueva. La pregunta se salta (y no se sube nada) con `--bump`, `--nobump`, `--nopause`, sin consola, o cuando no se va a publicar (`--nopublish`, `--nocheck`).
 
 ```bat
-build_exe.bat --bump patch     REM 0.1.0 -> 0.1.1, compila, empaqueta y publica
+build_exe.bat                  REM pregunta si subir la versión (Enter = patch)
+build_exe.bat --bump patch     REM 0.1.0 -> 0.1.1, sin preguntar
 build_exe.bat --bump minor     REM 0.1.1 -> 0.2.0
 build_exe.bat --bump major     REM 0.2.0 -> 1.0.0
-build_exe.bat                  REM misma versión: compila y empaqueta; el paso 7 se omite
+build_exe.bat --nobump         REM compila con la versión actual, sin preguntar
 python build\version.py        REM solo muestra la versión actual
 ```
+
+**¿Sube algo a Git?** El build **nunca hace commit ni push del código**. Lo único que publica es el `.exe` (y el lanzador y el zip) como **Release** de `Fenix-Corp/Utilities-Dist`, y solo si la versión es nueva (paso 7). Si subiste la versión, `__init__.py` queda **modificado sin commitear**: commitéalo tú para que el código refleje lo publicado.
 
 #### Publicar
 

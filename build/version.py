@@ -8,10 +8,15 @@ De ahi la lee la app (titulo de la ventana, chequeo de actualizaciones) y, por
 `pyproject.toml` (`dynamic = ["version"]`), el paquete. Los .bat (build_exe,
 package, msi, publish) la piden a este script en vez de duplicarla.
 
-Como en UtilitiesDevelopment (`shell/version.py`), la version se sube A MANO, a
-proposito: es la que compara el lanzador contra lo que cada maquina ya tiene
+Como en UtilitiesDevelopment (`shell/version.py`), la version la sube una PERSONA,
+a proposito: es la que compara el lanzador contra lo que cada maquina ya tiene
 para decidir si baja el .exe nuevo, y una version nueva es una decision, no un
-efecto secundario de compilar. `--bump` la sube cuando se pide expresamente.
+efecto secundario de compilar. Se sube con `--bump`, o contestando la pregunta
+que hace `build_exe.bat` al compilar (`--ask`).
+
+`--ask` solo pregunta si hay una consola real (stdin interactivo): sin ella, con
+la entrada redirigida o cerrada, NO sube nada. Asi un build automatico o lanzado
+desde otra herramienta nunca cambia la version ni publica por accidente.
 
 Uso (desde la raiz del repo):
 
@@ -19,6 +24,7 @@ Uso (desde la raiz del repo):
     python build\\version.py --bump patch     0.1.0 -> 0.1.1
     python build\\version.py --bump minor     0.1.1 -> 0.2.0
     python build\\version.py --bump major     0.2.0 -> 1.0.0
+    python build\\version.py --ask            pregunta si subirla (Enter = patch)
 
 Solo stdlib y ASCII: lo ejecutan los .bat antes de que exista nada mas.
 """
@@ -31,7 +37,7 @@ from pathlib import Path
 
 INIT = Path(__file__).resolve().parents[1] / "src" / "fb2p_studio" / "__init__.py"
 
-#: `__version__ = "0.1.0"` — literal simple: es lo que setuptools lee por AST.
+#: `__version__ = "0.1.0"`: literal simple, es lo que setuptools lee por AST.
 _RE = re.compile(r'^(__version__\s*=\s*)(["\'])(?P<v>\d+(?:\.\d+){1,3})\2', re.MULTILINE)
 
 
@@ -67,8 +73,57 @@ def write(version: str, path: Path = INIT) -> None:
     path.write_bytes(nuevo.encode("utf-8"))
 
 
+#: Respuesta -> tipo de subida. Enter (vacio) es patch: lo que casi siempre se quiere.
+_RESPUESTAS = {"": "patch", "p": "patch", "m": "minor", "j": "major"}
+
+
+def ask(path: Path = INIT) -> str | None:
+    """Pregunta si subir la version; devuelve la nueva, o None si no se subio.
+
+    Solo pregunta ante una consola real: con stdin redirigido o cerrado devuelve
+    None sin tocar nada (un build automatico nunca cambia la version solo). Una
+    respuesta que no se entiende tambien deja la version como esta: ante la duda,
+    no publicar una version nueva.
+    """
+    actual = read(path)
+    if sys.stdin is None or not sys.stdin.isatty():
+        return None
+
+    print(f"\nVersion actual: {actual}")
+    print("Un .exe con la MISMA version no llega al equipo: el lanzador compara la version.")
+    pregunta = (
+        "Subir la version?  "
+        f"Enter/P = patch ({bump(actual, 'patch')})  |  "
+        f"M = minor ({bump(actual, 'minor')})  |  "
+        f"J = major ({bump(actual, 'major')})  |  "
+        "N = dejarla: "
+    )
+    try:
+        crudo = input(pregunta)
+    except (EOFError, KeyboardInterrupt):
+        print()
+        return None
+
+    respuesta = crudo.strip().lower()
+    if respuesta in ("n", "no"):
+        print(f"Se deja la version {actual}.")
+        return None
+    tipo = _RESPUESTAS.get(respuesta)
+    if tipo is None:
+        print(f"No entendi {crudo.strip()!r}: se deja la version {actual}.")
+        return None
+
+    nueva = bump(actual, tipo)
+    write(nueva, path)
+    print(f"Version {actual} -> {nueva}")
+    return nueva
+
+
 def main(argv: list[str]) -> int:
     try:
+        if argv == ["--ask"]:
+            ask()
+            return 0
         if argv[:1] == ["--bump"]:
             if len(argv) != 2:
                 print("uso: version.py --bump major|minor|patch", file=sys.stderr)
@@ -80,7 +135,7 @@ def main(argv: list[str]) -> int:
             print(nueva)
             return 0
         if argv:
-            print("uso: version.py [--bump major|minor|patch]", file=sys.stderr)
+            print("uso: version.py [--bump major|minor|patch | --ask]", file=sys.stderr)
             return 2
         print(read())
         return 0

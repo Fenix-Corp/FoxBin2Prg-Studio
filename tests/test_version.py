@@ -108,3 +108,110 @@ def test_ningun_bat_lee_la_version_de_pyproject(bat: str) -> None:
     texto = (RAIZ / bat).read_text(encoding="ascii", errors="replace")
     assert "tomllib" not in texto, f"{bat} sigue leyendo la version de pyproject.toml"
     assert "version.py" in texto, f"{bat} no usa build/version.py"
+
+
+# ------------------------------------------------------------------- --ask
+class _Consola:
+    """Un stdin que dice ser (o no) una consola real."""
+
+    def __init__(self, interactiva: bool) -> None:
+        self._interactiva = interactiva
+
+    def isatty(self) -> bool:
+        return self._interactiva
+
+
+@pytest.fixture
+def init(tmp_path: Path) -> Path:
+    archivo = tmp_path / "__init__.py"
+    archivo.write_text('__version__ = "0.1.0"\n', encoding="utf-8")
+    return archivo
+
+
+def _responder(monkeypatch: pytest.MonkeyPatch, respuesta: str | None) -> list[str]:
+    """Simula una consola; `respuesta=None` es un Ctrl+Z/EOF. Devuelve lo preguntado."""
+    preguntas: list[str] = []
+
+    def input_falso(pregunta: str = "") -> str:
+        preguntas.append(pregunta)
+        if respuesta is None:
+            raise EOFError
+        return respuesta
+
+    monkeypatch.setattr("sys.stdin", _Consola(True))
+    monkeypatch.setattr("builtins.input", input_falso)
+    return preguntas
+
+
+def test_ask_sin_consola_no_pregunta_ni_sube_nada(
+    init: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Un build automatico (stdin redirigido o cerrado) jamas cambia la version solo."""
+    llamadas: list[str] = []
+    monkeypatch.setattr("builtins.input", lambda *_: llamadas.append("pregunto") or "")
+
+    for stdin in (_Consola(False), None):
+        monkeypatch.setattr("sys.stdin", stdin)
+        assert V.ask(init) is None
+
+    assert llamadas == [], "pregunto sin una consola real"
+    assert V.read(init) == "0.1.0"
+
+
+@pytest.mark.parametrize(
+    ("respuesta", "esperada"),
+    [
+        ("", "0.1.1"),  # Enter = patch
+        ("p", "0.1.1"),
+        ("  P  ", "0.1.1"),
+        ("m", "0.2.0"),
+        ("M", "0.2.0"),
+        ("j", "1.0.0"),
+    ],
+)
+def test_ask_sube_segun_la_respuesta(
+    init: Path, monkeypatch: pytest.MonkeyPatch, respuesta: str, esperada: str
+) -> None:
+    preguntas = _responder(monkeypatch, respuesta)
+
+    assert V.ask(init) == esperada
+    assert V.read(init) == esperada
+    assert len(preguntas) == 1
+    assert "0.1.1" in preguntas[0], "la pregunta tiene que mostrar a que version se subiria"
+
+
+@pytest.mark.parametrize("respuesta", ["n", "N", "no", "x", "patch", "1", None])
+def test_ask_ante_la_duda_deja_la_version(
+    init: Path, monkeypatch: pytest.MonkeyPatch, respuesta: str | None
+) -> None:
+    """N, una respuesta que no se entiende o un Ctrl+Z: no se publica una version nueva."""
+    _responder(monkeypatch, respuesta)
+
+    assert V.ask(init) is None
+    assert V.read(init) == "0.1.0"
+
+
+def test_el_cli_ask_no_falla_sin_consola(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("sys.stdin", _Consola(False))
+    assert V.main(["--ask"]) == 0
+
+
+def test_build_exe_pregunta_solo_cuando_corresponde() -> None:
+    """La pregunta se salta con --bump, --nobump, --nopause o sin publicacion."""
+    bat = (RAIZ / "build_exe.bat").read_text(encoding="ascii")
+
+    assert 'version.py --ask' in bat
+    antes = bat[: bat.index("version.py --ask")]
+    for salto in (
+        'if defined BUMP goto ask_done',
+        'if "%NOBUMP%"=="1" goto ask_done',
+        'if "%NOPAUSE%"=="1" goto ask_done',
+        'if "%DOPUBLISH%"=="0" goto ask_done',
+    ):
+        assert salto in antes, f"build_exe.bat ya no se salta la pregunta con: {salto}"
+    assert 'if /i "%~1"=="--nobump"' in bat, "build_exe.bat no reconoce --nobump"
+
+
+def test_el_script_de_version_es_ascii() -> None:
+    """Lo ejecutan los .bat en una consola donde los acentos se corrompen."""
+    assert (RAIZ / "build" / "version.py").read_text(encoding="utf-8").isascii()

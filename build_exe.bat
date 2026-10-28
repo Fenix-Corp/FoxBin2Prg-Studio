@@ -24,15 +24,20 @@ REM       (GitHub, repo publico Fenix-Corp/Utilities-Dist). El equipo abre el
 REM       LANZADOR, que baja y ejecuta la ultima version publicada.
 REM       Solo sube una version NUEVA: si el Release ya existe, no toca nada.
 REM
-REM  LA VERSION no la asigna la compilacion: vive en un solo sitio, __version__ de
-REM  src\fb2p_studio\__init__.py (la lee build\version.py), y se sube a proposito,
-REM  igual que en UtilitiesDevelopment. El lanzador compara esa version contra lo
-REM  que cada maquina ya tiene: un .exe nuevo con la MISMA version no llega al
-REM  equipo. Para subirla: --bump, o editar __version__ a mano.
+REM  LA VERSION no la asigna la compilacion sola: vive en un solo sitio, __version__
+REM  de src\fb2p_studio\__init__.py (la lee build\version.py), y la sube una
+REM  persona, igual que en UtilitiesDevelopment. El lanzador compara esa version
+REM  contra lo que cada maquina ya tiene: un .exe nuevo con la MISMA version no
+REM  llega al equipo.
+REM    - Sin parametros y con consola, build_exe.bat PREGUNTA al compilar si subirla
+REM      (Enter = patch). Con --nopause, sin consola o sin publicacion, NO pregunta
+REM      y NO sube nada: un build automatico no publica por accidente.
+REM    - El .bat no hace commit ni push del codigo; solo deja __init__.py modificado.
 REM
 REM  Opciones:
-REM    --bump TIPO  sube la version antes de compilar: patch (0.1.0 -> 0.1.1),
+REM    --bump TIPO  sube la version sin preguntar: patch (0.1.0 -> 0.1.1),
 REM                 minor (0.2.0) o major (1.0.0)
+REM    --nobump     no pregunta ni sube la version (compila con la actual)
 REM    --msi        ademas genera release\FoxBin2Prg-Studio-<version>.msi
 REM                 (requiere WiX: dotnet tool install --global wix)
 REM    --nozip      deja solo la carpeta de release, sin .zip
@@ -58,10 +63,12 @@ set "PUBARGS="
 set "NOPAUSE=0"
 set "DRY=0"
 set "BUMP="
+set "NOBUMP=0"
 set "PUBSTATE=omitido"
 
 :parse_args
 if "%~1"=="" goto after_args
+if /i "%~1"=="--nobump"    set "NOBUMP=1"
 if /i "%~1"=="--bump" (
   set "BUMP=%~2"
   shift
@@ -139,6 +146,19 @@ if defined BUMP (
     goto fail
   )
 )
+REM Sin --bump ni --nobump, con consola y con publicacion prevista: pregunta si
+REM subirla. version.py solo pregunta ante una consola real; --nopause tambien lo
+REM evita (build automatico). Sin respuesta clara deja la version como esta.
+if defined BUMP goto ask_done
+if "%NOBUMP%"=="1" goto ask_done
+if "%NOPAUSE%"=="1" goto ask_done
+if "%DOPUBLISH%"=="0" goto ask_done
+"%PY%" build\version.py --ask
+if errorlevel 1 (
+  echo [ERROR] No se pudo consultar la version ^(build\version.py^).
+  goto fail
+)
+:ask_done
 set "VERSION="
 for /f "delims=" %%v in ('"%PY%" build\version.py') do set "VERSION=%%v"
 if "%VERSION%"=="" (
