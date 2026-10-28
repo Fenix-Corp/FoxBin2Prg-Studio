@@ -70,9 +70,15 @@ CASOS = [
     ("texto de ayuda", T.TEXT_MUTED, T.SURFACE_ALT, 4.5),
     ("barra de estado", T.TEXT_MUTED, T.SURFACE_ALT, 4.5),
     ("encabezado de columna", T.TEXT_MUTED, T.SURFACE_ALT, 4.5),
-    # Menus desplegables (Archivo, Herramientas, Ayuda).
+    # Menus desplegables (el de Tema, en el menu lateral).
     ("menu · reposo", T.TEXT, T.SURFACE, 4.5),
     ("menu · raton encima", T.PRIMARY_DARK, T.HOVER_BG, 4.5),
+    # Menu lateral. El fondo es un degradado de SIDE_A a SIDE_B: se mide contra
+    # SIDE_B, el extremo mas claro, que es el peor caso.
+    ("lateral · opcion en reposo", T.SIDE_TEXT, T.SIDE_B, 4.5),
+    ("lateral · titulo de grupo", T.SIDE_GROUP, T.SIDE_B, 4.5),
+    ("lateral · raton encima", T.SIDE_TEXT_ACTIVE, T.SIDE_HOVER_BG, 4.5),
+    ("lateral · elegida", T.SIDE_TEXT_ACTIVE, T.SIDE_SELECTED_BG, 4.5),
     # Temas Claro y Oscuro: estan escritos en las paletas de ui/theme.py.
     ("claro · texto", "#2D3748", "#F7FAFC", 4.5),
     ("claro · ayuda (gris pizarra)", "#637083", "#F7FAFC", 4.5),

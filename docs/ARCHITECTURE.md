@@ -33,7 +33,7 @@ El CLI sólo entrega `ErrorLevel 0/1` y un CSV a stdout con mensajes localizados
 - **`core.bridge`**: envuelve `QProcess`. Genera `job.ini`, lanza VFP con el driver, escucha `finished()`.
 - **`core.ipc`**: `QFileSystemWatcher` sobre `progress.jsonl`, emite señales Qt por evento.
 - **`core.settings`**: wrapper sobre `QSettings` (ubicación: `%APPDATA%\FoxBin2Prg-Studio\`).
-- **`ui.*`**: PySide6, `QMainWindow` con `QTabWidget`. Las pestanas que ejecutan jobs (Convertir, Proyecto) comparten `ui.job_runner.JobRunner` (ciclo de vida del bridge + volcado de eventos al log) y `ui.widgets.advanced_options.AdvancedOptions`.
+- **`ui.*`**: PySide6, `QMainWindow` con un menu lateral (`ui.sidenav.SideNav`) y un `QStackedWidget`: la barra solo navega y la ventana muestra la pagina que toca. Las paginas que ejecutan jobs (Convertir, Proyecto) comparten `ui.job_runner.JobRunner` (ciclo de vida del bridge + volcado de eventos al log) y `ui.widgets.advanced_options.AdvancedOptions`.
 
 ### Driver VFP (`vfp_bridge/`)
 

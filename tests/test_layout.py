@@ -118,13 +118,13 @@ def test_el_alto_pedido_se_respeta(ventana, tema: str) -> None:  # noqa: ANN001
 
 
 @pytest.mark.parametrize("tema", [theme.CLARO, theme.ADS])
-def test_ninguna_pestana_se_monta(ventana, qapp, tema: str) -> None:  # noqa: ANN001
+def test_ninguna_pagina_se_monta(ventana, qapp, tema: str) -> None:  # noqa: ANN001
     win = ventana(tema)
-    for i in range(win._tabs.count()):  # noqa: SLF001
-        win._tabs.setCurrentIndex(i)  # noqa: SLF001
+    for i in range(win._pages.count()):  # noqa: SLF001
+        win._nav.select(i)  # noqa: SLF001
         qapp.processEvents()
-        choques = _solapamientos(win._tabs.widget(i))  # noqa: SLF001
-        assert not choques, f"tema {tema}, pestana {win._tabs.tabText(i)}: " + "; ".join(  # noqa: SLF001
+        choques = _solapamientos(win._pages.widget(i))  # noqa: SLF001
+        assert not choques, f"tema {tema}, pagina {win._nav.page_path(i)[1]}: " + "; ".join(  # noqa: SLF001
             choques
         )
 
@@ -137,10 +137,10 @@ def test_con_las_opciones_avanzadas_desplegadas_tampoco(ventana, qapp, tema: str
         tab._adv.setChecked(True)  # noqa: SLF001
     qapp.processEvents()
 
-    for i in range(win._tabs.count()):  # noqa: SLF001
-        win._tabs.setCurrentIndex(i)  # noqa: SLF001
+    for i in range(win._pages.count()):  # noqa: SLF001
+        win._nav.select(i)  # noqa: SLF001
         qapp.processEvents()
-        assert not _solapamientos(win._tabs.widget(i))  # noqa: SLF001
+        assert not _solapamientos(win._pages.widget(i))  # noqa: SLF001
 
 
 def test_las_opciones_avanzadas_colapsan_de_verdad(ventana, qapp) -> None:  # noqa: ANN001

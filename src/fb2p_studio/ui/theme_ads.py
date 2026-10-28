@@ -42,6 +42,21 @@ HOVER_BORDER = "#c3d2e4"
 SELECTED_INACTIVE_BG = "#ccdaea"
 ALT_ROW = "#fbfcfd"
 
+#: Menu lateral (ui/sidenav.py). Mismo degradado azul marino que la barra de los
+#: dashboards web de Fenix, pero sin su tercer tono (#4A6487): sobre ese azul
+#: claro los titulos de grupo bajaban a 1,9:1. El contraste se mide contra
+#: SIDE_B, el extremo mas claro del degradado.
+SIDE_A = "#152A44"
+SIDE_B = "#1F3A5E"
+SIDE_TEXT = "#C7D2E8"  # opcion en reposo
+SIDE_TEXT_ACTIVE = "#FFFFFF"  # al pasar el raton y la elegida
+SIDE_GROUP = "#9FB3D9"  # titulo de grupo, en versalitas
+SIDE_HOVER_BG = "#2D4A70"
+SIDE_SELECTED_BG = "#3B5D8A"
+SIDE_SELECTED_BORDER = "#5D7C9C"
+SIDE_FOCUS_BORDER = "#C7D2E8"
+SIDE_SEPARATOR = "#34507A"
+
 FONT_UI = '"Segoe UI", "Calibri", system-ui, sans-serif'
 FONT_MONO = '"Consolas", "Courier New", monospace'
 
@@ -75,6 +90,16 @@ def stylesheet() -> str:
         "hover_border": HOVER_BORDER,
         "sel_inactive": SELECTED_INACTIVE_BG,
         "alt_row": ALT_ROW,
+        "side_a": SIDE_A,
+        "side_b": SIDE_B,
+        "side_text": SIDE_TEXT,
+        "side_text_active": SIDE_TEXT_ACTIVE,
+        "side_group": SIDE_GROUP,
+        "side_hover": SIDE_HOVER_BG,
+        "side_selected": SIDE_SELECTED_BG,
+        "side_selected_border": SIDE_SELECTED_BORDER,
+        "side_focus": SIDE_FOCUS_BORDER,
+        "side_separator": SIDE_SEPARATOR,
     }
 
 
@@ -94,6 +119,59 @@ QMainWindow, QDialog { background: %(surface_alt)s; }
     font-weight: 600;
 }
 #bandaSubtitulo { color: #c8d4e4; font-size: 9pt; }
+
+/* Menu lateral: la navegacion entre paginas (ui/sidenav.py). Cuatro estados de
+   cada opcion: reposo, raton encima, elegida y foco. */
+#menuLateral {
+    background: qlineargradient(x1:0, y1:0, x2:0.25, y2:1,
+                                stop:0 %(side_a)s, stop:1 %(side_b)s);
+    border: none;
+}
+#menuLateralArea, #menuLateralContenido { background: transparent; }
+#menuLateral QScrollBar:vertical { background: transparent; width: 6px; }
+#menuLateral QScrollBar::handle:vertical {
+    background: %(side_separator)s;
+    border-radius: 3px;
+}
+QLabel#navGrupo {
+    color: %(side_group)s;
+    font-size: 8pt;
+    font-weight: 700;
+    padding: 12px 8px 4px 8px;
+}
+QFrame#navSeparador { color: %(side_separator)s; margin: 6px 4px; }
+QPushButton#navItem {
+    text-align: left;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    padding: 7px 9px;
+    background: transparent;
+    color: %(side_text)s;
+    font-weight: 600;
+}
+QPushButton#navItem:hover {
+    background: %(side_hover)s;
+    color: %(side_text_active)s;
+}
+QPushButton#navItem:checked {
+    background: %(side_selected)s;
+    border-color: %(side_selected_border)s;
+    color: %(side_text_active)s;
+}
+QPushButton#navItem:focus { border-color: %(side_focus)s; }
+QPushButton#navItem::menu-indicator { image: none; width: 0; }
+#menuLateral[colapsada="true"] QPushButton#navItem {
+    text-align: center;
+    padding: 7px 0;
+}
+
+/* Encabezado de la seccion visible, sobre la pagina: «Grupo > Pagina». */
+QLabel#tituloSeccion {
+    color: %(primary)s;
+    font-size: 13pt;
+    font-weight: 600;
+    padding: 0 2px 6px 2px;
+}
 
 QTabBar { background: transparent; }
 QTabWidget::pane {
@@ -286,15 +364,13 @@ QLabel#datoClave { font-weight: 600; color: %(primary_dark)s; }
 QStatusBar { background: %(surface_alt)s; color: %(muted)s; }
 QStatusBar::item { border: none; }
 
-QMenuBar { background: %(surface_alt)s; }
-QMenuBar::item:selected { background: %(hover)s; color: %(primary_dark)s; }
-/* Menus desplegables. La opcion bajo el raton va en un tono CLARO con texto
-   azul marino (11,5:1), igual que el arbol y la barra de menus: el azul
+/* Menus desplegables (el de Tema en el menu lateral). La opcion bajo el raton va
+   en un tono CLARO con texto azul marino (11,5:1), igual que el arbol: el azul
    corporativo lleno se reserva para lo ELEGIDO, no para el paso del raton.
    Mismo criterio que UtilitiesDevelopment. */
 QMenu { background: %(surface)s; border: 1px solid %(border)s; padding: 4px; }
 QMenu::item {
-    padding: 5px 22px;
+    padding: 6px 22px 6px 26px;
     border: 1px solid transparent;
     border-radius: 3px;
     color: %(text)s;
@@ -305,6 +381,13 @@ QMenu::item:selected {
     border-color: %(hover_border)s;
     color: %(primary_dark)s;
 }
+QMenu::item:checked { color: %(primary)s; font-weight: 600; }
 QMenu::item:disabled { color: %(muted)s; }
 QMenu::separator { height: 1px; background: %(border)s; margin: 4px 6px; }
+QMenu::indicator { width: 14px; height: 14px; left: 6px; }
+QMenu::indicator:checked {
+    background: %(primary)s;
+    border: 1px solid %(primary_dark)s;
+    border-radius: 7px;
+}
 """
