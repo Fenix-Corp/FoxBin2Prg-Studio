@@ -119,25 +119,46 @@ Eso actualiza `src/fb2p_studio/resources/i18n/fb2p_studio_<lang>.ts` con las cad
 
 Para sumar un idioma, agregarlo a `IDIOMAS` en `build/i18n.bat`. En runtime, `app.py` carga el `.qm` que corresponda al locale del sistema; si no hay, la UI queda en español.
 
-### Aviso de versión nueva
+### Actualización: el lanzador
 
-Studio consulta al arrancar el **canal de distribución** —el repo público [`Fenix-Corp/Utilities-Dist`](https://github.com/Fenix-Corp/Utilities-Dist), el mismo de las Utilidades de Desarrollo— y avisa con un toast si hay una versión más nueva. **Sólo avisa**: el aviso ofrece **Descargar** (abre el enlace del `.exe`), pero no instala nada. También se puede pedir a mano con **Buscar actualizaciones...**, al pie del menú lateral.
+Mismo esquema que las Utilidades de Desarrollo (`fnxLauncher`). El equipo **no abre `FoxBin2Prg-Studio.exe`: abre `FoxBin2Prg-Studio-Launcher.exe`** (un acceso directo). El lanzador es un `.exe` diminuto, solo con la biblioteca estándar y sin Qt (`launcher/launcher.py`), que cada vez que se abre:
 
-Cada versión de Studio es un Release de ese repo, con la etiqueta `foxbin2prg-studio-vX.Y.Z` y el `FoxBin2Prg-Studio.exe` adjunto (el prefijo propio lo distingue de las etiquetas `fnxUtilidades-v*` de las otras utilidades, con las que comparte el canal). Como el repo es público, Studio lo lee sin token ni credenciales.
+1. Consulta a la API pública de GitHub cuál es el último Release de Studio del **canal de distribución**, el repo público [`Fenix-Corp/Utilities-Dist`](https://github.com/Fenix-Corp/Utilities-Dist) (el de las Utilidades de Desarrollo; solo binarios, **sin token ni credenciales**).
+2. Lo compara con la marca local (`installed.txt`).
+3. Si hay una más nueva —o no hay ninguna copia— la baja a **una carpeta única por máquina**, `C:\Fnx_Backup\exes\foxbin2prg_studio` (override: variable `FNX_STUDIO_DIR`), para que en un servidor RDP el `.exe` no se duplique por usuario.
+4. Ejecuta esa copia.
 
-**Publicar una versión nueva** lo hace la propia compilación:
+Es tolerante a fallos: sin red abre la copia local; la descarga va a un `.part` que solo reemplaza al `.exe` al terminar, así que una descarga cortada, o un `.exe` en uso por otro usuario, nunca deja a nadie sin Studio. Deja un `launcher.log` en esa carpeta. Como el lanzador no se actualiza a sí mismo, cambia muy rara vez; se reparte una vez (va en el zip y como asset de cada Release).
 
-1. Sube `version` en `pyproject.toml`.
-2. Ejecuta `build_exe.bat`. Al final (paso 7) sube el `.exe` y el `.zip` al canal con `build\publish.bat`.
+**Si se abre el `.exe` directo** (sin lanzador), Studio sigue avisando por sí mismo: al arrancar consulta el mismo canal y muestra un toast; también **Buscar actualizaciones...** al pie del menú lateral. Ese aviso ofrece **Descargar** pero no instala nada.
 
-Reglas del paso 7:
+Cada versión de Studio es un Release de ese repo, con la etiqueta `foxbin2prg-studio-vX.Y.Z` (el prefijo propio la distingue de las `fnxUtilidades-v*` de las otras utilidades, con las que comparte el canal) y como assets `FoxBin2Prg-Studio.exe`, `FoxBin2Prg-Studio-Launcher.exe` y el `.zip`.
 
-- **Solo publica una versión nueva.** Si el Release ya existe no toca nada y lo dice (código 2): así no se pisa un `.exe` que alguien pudo haber bajado. `build_exe.bat --republish` reemplaza los archivos de la versión existente.
+#### La versión
+
+**La compilación no asigna una versión nueva**: se sube a propósito, como en UtilitiesDevelopment (`APP_VERSION`), porque es lo que el lanzador compara para decidir si bajar. Vive en **un solo sitio**, `__version__` en `src/fb2p_studio/__init__.py`; `pyproject.toml` la lee de ahí (`dynamic`) y los `.bat` se la piden a `build/version.py`. Un `.exe` nuevo con la **misma** versión no llega al equipo.
+
+```bat
+build_exe.bat --bump patch     REM 0.1.0 -> 0.1.1, compila, empaqueta y publica
+build_exe.bat --bump minor     REM 0.1.1 -> 0.2.0
+build_exe.bat --bump major     REM 0.2.0 -> 1.0.0
+build_exe.bat                  REM misma versión: compila y empaqueta; el paso 7 se omite
+python build\version.py        REM solo muestra la versión actual
+```
+
+#### Publicar
+
+Lo hace la propia compilación (`build_exe.bat`, paso 7, `build\publish.bat`):
+
+- **Solo publica una versión nueva.** Si el Release ya existe no toca nada y lo dice (código 2): así no se pisa un `.exe` que alguien pudo haber bajado. `--republish` reemplaza los archivos de la versión existente.
 - **No publica sin pasar las pruebas:** `--nocheck` implica `--nopublish`.
 - `--nopublish` compila y empaqueta sin subir nada; `--dry-run` muestra qué subiría.
 - Requiere [`gh`](https://cli.github.com) con sesión (`gh auth login`) y permiso de escritura en `Utilities-Dist`. Si la subida falla, el build queda hecho en `dist\` y `release\`; se reintenta solo la subida con `build\publish.bat`.
+- El lanzador se compila con `build\launcher.bat` (que primero corre sus pruebas) dentro del mismo `build_exe.bat`.
 
-El origen se puede cambiar en **Preferencias** (pie del menú lateral) y admite tres formas:
+#### Origen del aviso del `.exe`
+
+El aviso interno se puede apuntar en **Preferencias** (pie del menú lateral) a otra fuente:
 
 | Origen | Ejemplo |
 |---|---|
@@ -145,9 +166,9 @@ El origen se puede cambiar en **Preferencias** (pie del menú lateral) y admite 
 | Manifiesto JSON en una carpeta de red | `\\192.168.0.16\Compilado_16\FoxBin2Prg-Studio\latest.json` |
 | Manifiesto JSON en una URL https | un link de Google Drive o SharePoint |
 
-Los links de compartir de Drive y SharePoint se convierten solos a su forma de descarga directa: el link que se copia del navegador devuelve una página HTML, no el JSON. La consulta corre fuera del hilo de la UI y con timeout, así que estar sin red no demora el arranque.
+Los links de compartir de Drive y SharePoint se convierten solos a su forma de descarga directa. La consulta corre fuera del hilo de la UI y con timeout, así que estar sin red no demora el arranque.
 
-> **Límite de GitHub:** sin token la API permite 60 consultas por hora y por IP. Una oficina que sale por una sola IP puede agotarlo; en ese caso el chequeo manual lo dice («GitHub limitó las consultas») y el del arranque calla.
+> **Límite de GitHub:** sin token la API permite 60 consultas por hora y por IP. Una oficina que sale por una sola IP puede agotarlo; el lanzador abre entonces la copia local, y el aviso manual dice «GitHub limitó las consultas».
 
 ### Temas
 

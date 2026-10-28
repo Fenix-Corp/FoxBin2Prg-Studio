@@ -65,8 +65,9 @@ Terminada la instalación, vuelve a correr `? VERSION(4)` para confirmar el buil
 
 ## Instalación
 
-1. Copia el `.exe` donde quieras (Escritorio, `C:\Tools\`, una carpeta de red; no importa).
-2. Doble clic en `FoxBin2Prg-Studio.exe`.
+**Forma recomendada: el lanzador.** Copia `FoxBin2Prg-Studio-Launcher.exe` donde quieras (o crea un acceso directo a él) y ábrelo. La primera vez **baja la última versión de Studio** a una carpeta única de la máquina (`C:\Fnx_Backup\exes\foxbin2prg_studio`) y la abre; las siguientes veces solo comprueba si hay una más nueva. Así siempre abres la última versión, sin copiar nada a mano. Ver [Actualizaciones](#actualizaciones).
+
+**Alternativa: el `.exe` directo.** También funciona copiar `FoxBin2Prg-Studio.exe` donde quieras y abrirlo con doble clic; en ese caso la actualización es manual.
 
 No requiere instalador, no modifica el registro y no pide permisos de administrador. (Para equipos gestionados por IT existe también un `.msi`.)
 
@@ -247,13 +248,33 @@ Mientras no elijas uno, Studio arranca en Claro u Oscuro según el modo de Windo
 
 ## Actualizaciones
 
-Al arrancar, Studio consulta si hay una versión más nueva y, si la hay, avisa con un **mensaje flotante** que se va solo y deja un enlace en la barra de estado. También puedes pedirlo cuando quieras con **Buscar actualizaciones...**: esa vez contesta siempre, incluso si no pudo consultar.
+### Con el lanzador (lo normal)
 
-El aviso ofrece **Descargar**, que abre el enlace del `.exe` nuevo. **Studio solo avisa**: no descarga ni instala nada por sí mismo. Para actualizar, cierra Studio y reemplaza el `.exe` por el nuevo.
+Abre Studio **siempre por el lanzador** (`FoxBin2Prg-Studio-Launcher.exe`). Cada vez que lo abres:
 
-Las versiones se publican en el repositorio público de distribución `Fenix-Corp/Utilities-Dist`, que es el origen por defecto. Si trabajas en una máquina que no ve GitHub, en Preferencias puedes apuntar el origen a otro repositorio, a un manifiesto JSON en una carpeta de red o a una URL https.
+1. Consulta cuál es la última versión publicada.
+2. La compara con la que ya hay en tu máquina.
+3. Si hay una más nueva, la **descarga** (verás el avance en MB en una ventana de consola) y la guarda en `C:\Fnx_Backup\exes\foxbin2prg_studio`.
+4. **Abre Studio.** La ventana de consola se cierra sola.
 
-> **Límite de GitHub.** Sin credenciales, GitHub permite unas 60 consultas por hora desde una misma red. Si una oficina entera sale por la misma IP, el chequeo manual avisará «GitHub limitó las consultas»; reintenta más tarde.
+No tienes que hacer nada más: abrir el lanzador *es* actualizar. Si no hay red, abre la copia que ya tenías; si una descarga se corta a la mitad, la copia anterior no se toca.
+
+- **Una sola copia por máquina.** En un servidor con varios usuarios (RDP) el `.exe` no se duplica por usuario: vive en esa carpeta única. Quien actualiza necesita permiso de escritura en ella; los demás usuarios abren la copia que ya está.
+- **Si Studio está abierto** (por otro usuario) no se puede reemplazar el `.exe`: el lanzador abre la copia vigente y actualiza la próxima vez que nadie lo tenga abierto.
+- **Otra carpeta.** Se puede cambiar con la variable de entorno `FNX_STUDIO_DIR`.
+- **Bitácora.** El lanzador deja un `launcher.log` en esa carpeta, con el paso a paso: si algo no se baja, ahí está el motivo.
+
+### Si abres el `.exe` directo
+
+Studio también avisa por sí mismo, para quien no usa el lanzador. Al arrancar consulta si hay una versión más nueva y, si la hay, muestra un **mensaje flotante** que se va solo y deja un enlace en la barra de estado. También puedes pedirlo con **Buscar actualizaciones...**: esa vez contesta siempre, incluso si no pudo consultar.
+
+El aviso ofrece **Descargar**, que abre el enlace del `.exe` nuevo. En este modo **Studio solo avisa**: para actualizar, cierra Studio y reemplaza el `.exe`, o —más simple— empieza a usar el lanzador.
+
+### De dónde salen las versiones
+
+Se publican como Releases del repositorio público de distribución `Fenix-Corp/Utilities-Dist`, el mismo de las Utilidades de Desarrollo, con la etiqueta `foxbin2prg-studio-vX.Y.Z`. Ese es el origen por defecto. Si trabajas en una máquina que no ve GitHub, en Preferencias puedes apuntar el aviso a otro repositorio, a un manifiesto JSON en una carpeta de red o a una URL https.
+
+> **Límite de GitHub.** Sin credenciales, GitHub permite unas 60 consultas por hora desde una misma red. Si una oficina entera sale por la misma IP, el chequeo puede fallar: el aviso manual dirá «GitHub limitó las consultas» y el lanzador abrirá la copia que ya tienes. Reintenta más tarde.
 
 ---
 

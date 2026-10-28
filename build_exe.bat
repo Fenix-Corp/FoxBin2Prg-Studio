@@ -15,18 +15,20 @@ REM       compila
 REM    3) Limpia dist\ y el cache de PyInstaller (build\ guarda los scripts, NO
 REM       se borra entero)
 REM    4) Compila dist\FoxBin2Prg-Studio.exe (icono, traducciones y spec los
-REM       resuelve build\build.bat)
+REM       resuelve build\build.bat) y dist\FoxBin2Prg-Studio-Launcher.exe (el
+REM       lanzador, build\launcher.bat)
 REM    5) Distribucion: release\FoxBin2Prg-Studio-<version>\ + .zip
 REM    6) Opcional: .msi para IT (GPO / Intune)
-REM    7) Publica el .exe en el canal de actualizacion (GitHub, repo publico
-REM       Fenix-Corp/Utilities-Dist) para que Studio avise de la version nueva.
+REM    7) Publica el .exe, el lanzador y el .zip en el canal de actualizacion
+REM       (GitHub, repo publico Fenix-Corp/Utilities-Dist). El equipo abre el
+REM       LANZADOR, que baja y ejecuta la ultima version publicada.
 REM       Solo sube una version NUEVA: si el Release ya existe, no toca nada.
 REM
 REM  LA VERSION no la asigna la compilacion: vive en un solo sitio, __version__ de
 REM  src\fb2p_studio\__init__.py (la lee build\version.py), y se sube a proposito,
-REM  igual que en UtilitiesDevelopment. Es la que identifica a cada Release: un
-REM  .exe nuevo con la MISMA version no se publica. Para subirla: --bump, o
-REM  editar __version__ a mano.
+REM  igual que en UtilitiesDevelopment. El lanzador compara esa version contra lo
+REM  que cada maquina ya tiene: un .exe nuevo con la MISMA version no llega al
+REM  equipo. Para subirla: --bump, o editar __version__ a mano.
 REM
 REM  Opciones:
 REM    --bump TIPO  sube la version antes de compilar: patch (0.1.0 -> 0.1.1),
@@ -181,6 +183,17 @@ if not exist "dist\FoxBin2Prg-Studio.exe" (
   echo [ERROR] No se genero dist\FoxBin2Prg-Studio.exe.
   goto fail
 )
+echo.
+echo       Lanzador ...
+call build\launcher.bat
+if errorlevel 1 (
+  echo [ERROR] Fallo la compilacion del lanzador.
+  goto fail
+)
+if not exist "dist\FoxBin2Prg-Studio-Launcher.exe" (
+  echo [ERROR] No se genero dist\FoxBin2Prg-Studio-Launcher.exe.
+  goto fail
+)
 
 REM --- 5) Distribucion --------------------------------------------------------
 echo.
@@ -233,14 +246,15 @@ echo ============================================================
 echo   OK  -  FoxBin2Prg-Studio %VERSION%
 echo.
 echo   EXE      : %~dp0dist\FoxBin2Prg-Studio.exe
+echo   Lanzador : %~dp0dist\FoxBin2Prg-Studio-Launcher.exe
 echo   Carpeta  : %~dp0release\FoxBin2Prg-Studio-%VERSION%\
 if "%DOZIP%"=="1" echo   ZIP      : %~dp0release\FoxBin2Prg-Studio-%VERSION%.zip
 if "%DOMSI%"=="1" echo   MSI      : %~dp0release\FoxBin2Prg-Studio-%VERSION%.msi
 echo   GitHub   : %PUBSTATE%
 echo.
 echo   - El EXE lleva PySide6, el puente VFP y FoxBin2Prg adentro (onefile).
-echo   - Para compartir: entrega el .zip o la carpeta de release.
-if "%PUBSTATE%"=="publicado" echo   - Studio avisara de esta version a quien la busque en Preferencias.
+echo   - Para compartir: entrega el LANZADOR (acceso directo) o el .zip.
+if "%PUBSTATE%"=="publicado" echo   - Quien abra el lanzador recibira esta version.
 echo ============================================================
 echo.
 if "%NOPAUSE%"=="0" pause

@@ -83,6 +83,11 @@ if exist "%RELDIR%" (
 REM --- 4. Copiar payload ---------------------------------------------------
 copy /y "dist\FoxBin2Prg-Studio.exe" "%RELDIR%\" >nul || goto :err
 
+REM El lanzador es lo que el equipo ancla con un acceso directo (baja y abre la
+REM ultima version): se reparte junto al paquete. Lo compila build\launcher.bat;
+REM si falta (un build suelto) el paquete sale igual, sin el.
+if exist "dist\FoxBin2Prg-Studio-Launcher.exe" copy /y "dist\FoxBin2Prg-Studio-Launcher.exe" "%RELDIR%\" >nul
+
 REM Los .txt / .md vienen del template si existen
 if exist "%TEMPLATE%\LEEME.txt"    copy /y "%TEMPLATE%\LEEME.txt"    "%RELDIR%\" >nul
 if exist "%TEMPLATE%\LEEME.md"     copy /y "%TEMPLATE%\LEEME.md"     "%RELDIR%\" >nul

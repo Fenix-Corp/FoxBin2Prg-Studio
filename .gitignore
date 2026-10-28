@@ -57,3 +57,6 @@ release/FoxBin2Prg-Studio-*/
 release/*.zip
 release/*.msi
 release/*.wixpdb
+
+# Temporales del lanzador (build\launcher.bat) y copia de la version publicada
+build/launcher_work/

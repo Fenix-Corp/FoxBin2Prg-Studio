@@ -9,6 +9,9 @@ REM  Fenix-Corp/Utilities-Dist (el mismo canal de las Utilidades de Desarrollo)
 REM  con el .exe adjunto. Es lo que lee Studio al buscar actualizaciones
 REM  (core\updates.py: TAG_PREFIX y ASSET_NAME deben coincidir con los de aqui).
 REM
+REM  Sube el .exe de Studio, el lanzador (FoxBin2Prg-Studio-Launcher.exe, lo que el
+REM  equipo ancla) y el .zip del paquete.
+REM
 REM  Solo publica una version NUEVA: si el Release ya existe no toca nada (sale
 REM  con codigo 2), para no pisar un .exe que alguien ya pudo haber bajado. Sube
 REM  la version (build_exe.bat --bump patch, o __version__ en __init__.py), o usa
@@ -73,6 +76,9 @@ if not exist "%EXE%" (
     goto :fail
 )
 set "ARCHIVOS="%EXE%""
+REM El lanzador (lo que el equipo ancla) tambien va al canal, para poder bajarlo de ahi.
+set "LANZADOR=dist\FoxBin2Prg-Studio-Launcher.exe"
+if exist "%LANZADOR%" set "ARCHIVOS=!ARCHIVOS! "!LANZADOR!""
 set "ZIP=release\FoxBin2Prg-Studio-%VERSION%.zip"
 if exist "%ZIP%" set "ARCHIVOS=!ARCHIVOS! "!ZIP!""
 
@@ -99,8 +105,8 @@ if not errorlevel 1 (
     if "%FORCE%"=="0" (
         echo.
         echo [publish] OMITIDO: el Release %TAG% ya existe en %REPO%.
-        echo           No se subio nada. La version identifica a cada Release, asi
-        echo           que un .exe nuevo con la misma version NO se publicaria.
+        echo           No se subio nada. El lanzador compara la version, asi que
+        echo           un .exe nuevo con la misma version NO llegaria al equipo.
         echo           Para publicar una version nueva:  build_exe.bat --bump patch
         echo           ^(o sube __version__ en src\fb2p_studio\__init__.py^).
         echo           Para reemplazar los archivos de esta:  build\publish.bat --force
