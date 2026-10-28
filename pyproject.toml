@@ -4,7 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fb2p-studio"
-version = "0.1.0"
+# La version vive en un solo sitio: src/fb2p_studio/__init__.py (build/version.py).
+dynamic = ["version"]
 description = "GUI de administracion para FoxBin2Prg — utilitario generico para proyectos VFP9"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -27,6 +28,9 @@ fb2p-studio = "fb2p_studio.__main__:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.dynamic]
+version = { attr = "fb2p_studio.__version__" }
 
 [tool.setuptools.package-data]
 "fb2p_studio" = ["resources/*"]

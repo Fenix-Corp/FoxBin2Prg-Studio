@@ -36,9 +36,9 @@ goto parse_args
 :after_args
 
 REM --- 1. Version -----------------------------------------------------------
-REM Leemos la version con Python (tomllib, stdlib). El venv de dev
-REM esta disponible porque el build lo necesita si o si. Se puede
-REM overridear pasando la version como primer argumento.
+REM La version vive en un solo sitio (src\fb2p_studio\__init__.py) y la lee
+REM build\version.py. El venv de dev esta disponible porque el build lo necesita
+REM si o si. Se puede overridear pasando la version como primer argumento.
 if "%VERSION%"=="" (
     if not exist ".venv\Scripts\python.exe" (
         echo [package] No hay .venv con Python. Crealo con:
@@ -47,10 +47,10 @@ if "%VERSION%"=="" (
         popd
         exit /b 1
     )
-    for /f "delims=" %%v in ('.venv\Scripts\python.exe -c "import tomllib,pathlib;print(tomllib.loads(pathlib.Path(r'pyproject.toml').read_text())['project']['version'])"') do set "VERSION=%%v"
+    for /f "delims=" %%v in ('.venv\Scripts\python.exe build\version.py') do set "VERSION=%%v"
 )
 if "%VERSION%"=="" (
-    echo [package] No pude leer la version del pyproject.toml.
+    echo [package] No pude leer la version ^(build\version.py^).
     popd
     exit /b 1
 )

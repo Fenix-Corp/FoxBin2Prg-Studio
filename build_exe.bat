@@ -16,14 +16,21 @@ REM    3) Limpia dist\ y el cache de PyInstaller (build\ guarda los scripts, NO
 REM       se borra entero)
 REM    4) Compila dist\FoxBin2Prg-Studio.exe (icono, traducciones y spec los
 REM       resuelve build\build.bat)
-REM    5) Distribucion: release\FoxBin2Prg-Studio-<version>\ + .zip (la version
-REM       sale del pyproject.toml)
+REM    5) Distribucion: release\FoxBin2Prg-Studio-<version>\ + .zip
 REM    6) Opcional: .msi para IT (GPO / Intune)
 REM    7) Publica el .exe en el canal de actualizacion (GitHub, repo publico
 REM       Fenix-Corp/Utilities-Dist) para que Studio avise de la version nueva.
 REM       Solo sube una version NUEVA: si el Release ya existe, no toca nada.
 REM
+REM  LA VERSION no la asigna la compilacion: vive en un solo sitio, __version__ de
+REM  src\fb2p_studio\__init__.py (la lee build\version.py), y se sube a proposito,
+REM  igual que en UtilitiesDevelopment. Es la que identifica a cada Release: un
+REM  .exe nuevo con la MISMA version no se publica. Para subirla: --bump, o
+REM  editar __version__ a mano.
+REM
 REM  Opciones:
+REM    --bump TIPO  sube la version antes de compilar: patch (0.1.0 -> 0.1.1),
+REM                 minor (0.2.0) o major (1.0.0)
 REM    --msi        ademas genera release\FoxBin2Prg-Studio-<version>.msi
 REM                 (requiere WiX: dotnet tool install --global wix)
 REM    --nozip      deja solo la carpeta de release, sin .zip
@@ -48,10 +55,15 @@ set "DOPUBLISH=1"
 set "PUBARGS="
 set "NOPAUSE=0"
 set "DRY=0"
+set "BUMP="
 set "PUBSTATE=omitido"
 
 :parse_args
 if "%~1"=="" goto after_args
+if /i "%~1"=="--bump" (
+  set "BUMP=%~2"
+  shift
+)
 if /i "%~1"=="--msi"       set "DOMSI=1"
 if /i "%~1"=="--nozip"     set "DOZIP=0"
 if /i "%~1"=="--nocheck"   set "DOCHECK=0"
@@ -66,6 +78,15 @@ goto parse_args
 
 REM Sin pruebas no hay publicacion: lo que se sube lo usa todo el equipo.
 if "%DOCHECK%"=="0" set "DOPUBLISH=0"
+
+REM --bump solo admite estos tres; mejor fallar aqui que a mitad del build.
+if not defined BUMP goto bump_ok
+if /i "%BUMP%"=="patch" goto bump_ok
+if /i "%BUMP%"=="minor" goto bump_ok
+if /i "%BUMP%"=="major" goto bump_ok
+echo [ERROR] --bump necesita patch, minor o major ^(se recibio "%BUMP%"^).
+goto fail
+:bump_ok
 
 echo ============================================================
 echo   FoxBin2Prg-Studio  -  Compilar y distribuir
@@ -103,6 +124,27 @@ if errorlevel 1 (
 
 REM Con el .venv al frente del PATH, build.bat encuentra pyinstaller y python.
 set "PATH=%CD%\.venv\Scripts;%PATH%"
+
+REM --- Version: la que hay, o la que se sube con --bump ------------------------
+REM Va ANTES de las pruebas y de compilar: lo que se prueba, se empaqueta y se
+REM publica es siempre la misma version. La compilacion en si no la cambia.
+if defined BUMP (
+  echo.
+  echo Subiendo la version ^(%BUMP%^) ...
+  "%PY%" build\version.py --bump %BUMP% >nul
+  if errorlevel 1 (
+    echo [ERROR] No se pudo subir la version ^(build\version.py^).
+    goto fail
+  )
+)
+set "VERSION="
+for /f "delims=" %%v in ('"%PY%" build\version.py') do set "VERSION=%%v"
+if "%VERSION%"=="" (
+  echo [ERROR] No pude leer la version ^(build\version.py^).
+  goto fail
+)
+echo.
+echo Version: %VERSION%
 
 REM --- 2) Lint + pruebas (puerta de seguridad) --------------------------------
 echo.
@@ -143,12 +185,6 @@ if not exist "dist\FoxBin2Prg-Studio.exe" (
 REM --- 5) Distribucion --------------------------------------------------------
 echo.
 echo [5/7] Armando el paquete de distribucion ...
-set "VERSION="
-for /f "delims=" %%v in ('.venv\Scripts\python.exe -c "import tomllib,pathlib;print(tomllib.loads(pathlib.Path(r'pyproject.toml').read_text())['project']['version'])"') do set "VERSION=%%v"
-if "%VERSION%"=="" (
-  echo [ERROR] No pude leer la version del pyproject.toml.
-  goto fail
-)
 if "%DOZIP%"=="1" (
   call build\package.bat %VERSION% --zip
 ) else (

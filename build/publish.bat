@@ -11,7 +11,8 @@ REM  (core\updates.py: TAG_PREFIX y ASSET_NAME deben coincidir con los de aqui).
 REM
 REM  Solo publica una version NUEVA: si el Release ya existe no toca nada (sale
 REM  con codigo 2), para no pisar un .exe que alguien ya pudo haber bajado. Sube
-REM  la version en pyproject.toml, o usa --force para reemplazar los archivos.
+REM  la version (build_exe.bat --bump patch, o __version__ en __init__.py), o usa
+REM  --force para reemplazar los archivos.
 REM
 REM  Requiere gh (GitHub CLI) autenticado con escritura en Utilities-Dist.
 REM
@@ -58,7 +59,7 @@ if "%VERSION%"=="" (
         echo    build\publish.bat 0.1.0
         goto :fail
     )
-    for /f "delims=" %%v in ('.venv\Scripts\python.exe -c "import tomllib,pathlib;print(tomllib.loads(pathlib.Path(r'pyproject.toml').read_text())['project']['version'])"') do set "VERSION=%%v"
+    for /f "delims=" %%v in ('.venv\Scripts\python.exe build\version.py') do set "VERSION=%%v"
 )
 if "%VERSION%"=="" (
     echo [publish] No pude determinar la version.
@@ -98,9 +99,11 @@ if not errorlevel 1 (
     if "%FORCE%"=="0" (
         echo.
         echo [publish] OMITIDO: el Release %TAG% ya existe en %REPO%.
-        echo           No se subio nada. Para publicar una version nueva, sube
-        echo           "version" en pyproject.toml; para reemplazar los archivos
-        echo           de esta, usa:  build\publish.bat --force
+        echo           No se subio nada. La version identifica a cada Release, asi
+        echo           que un .exe nuevo con la misma version NO se publicaria.
+        echo           Para publicar una version nueva:  build_exe.bat --bump patch
+        echo           ^(o sube __version__ en src\fb2p_studio\__init__.py^).
+        echo           Para reemplazar los archivos de esta:  build\publish.bat --force
         popd
         endlocal
         exit /b 2

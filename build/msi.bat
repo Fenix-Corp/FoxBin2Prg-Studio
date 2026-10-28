@@ -33,7 +33,7 @@ if "%VERSION%"=="" (
         echo    build\msi.bat 0.1.0
         goto :fail
     )
-    for /f "delims=" %%v in ('.venv\Scripts\python.exe -c "import tomllib,pathlib;print(tomllib.loads(pathlib.Path(r'pyproject.toml').read_text())['project']['version'])"') do set "VERSION=%%v"
+    for /f "delims=" %%v in ('.venv\Scripts\python.exe build\version.py') do set "VERSION=%%v"
 )
 if "%VERSION%"=="" (
     echo [msi] No pude determinar la version.
