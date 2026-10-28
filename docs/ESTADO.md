@@ -137,7 +137,7 @@ Cierra toda la sección 4.3. Detalle y decisiones tomadas, en §4.3.
 | **Lint limpio** | 5 hallazgos de ruff arreglados (I001, SIM102, E741 ×2, F401). | `ui/tab_convert.py`, `ui/widgets/path_picker.py` |
 | **Gate de calidad** | `check.bat` = ruff + pytest (+ `--build`, `--fix`). | `build/check.bat` |
 | **CI** | Workflow de lint + tests + build + artifact. | `.github/workflows/ci.yml` |
-| **Update check** | Manifiesto JSON en red, leído fuera del hilo de UI; aviso no intrusivo + menú Ayuda; configurable en Preferencias. | `core/updates.py`, `core/settings.py`, `ui/main_window.py`, `ui/dialog_preferences.py` |
+| **Update check** | Manifiesto JSON en red, leído fuera del hilo de UI; aviso no intrusivo + opción «Buscar actualizaciones...» del menú lateral; configurable en Preferencias. | `core/updates.py`, `core/settings.py`, `ui/main_window.py`, `ui/dialog_preferences.py` |
 | **MSI** | Instalador WiX 5 verificado. | `build/msi/fb2p_studio.wxs`, `build/msi.bat` |
 | **i18n** | 85 cadenas en `self.tr()`, extracción/compilación, carga por locale, `.qm` bundleado en el spec. | todo `ui/`, `app.py`, `build/i18n.bat`, `build/fb2p_studio.spec` |
 | **Tests** | Icono (estructura del `.ico`) y updates (versiones + manifiesto). **39 tests**, todos en verde. | `tests/test_icon.py`, `tests/test_updates.py` |
@@ -276,33 +276,28 @@ Con `QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)` bajo a
 - [x] **CI (GitHub Actions)** — `.github/workflows/ci.yml`: lint + tests + build del `.exe` como artifact, en `windows-latest`. **Queda inerte hasta que el repo tenga remoto** (hoy no hay ninguno: `git remote -v` vacío). Para un runner propio en el NAS, cambiar una línea (`runs-on: [self-hosted, windows]`). El blocker de "dónde correrlo" no se resolvió por definición sino por diseño: el workflow sirve igual en los dos escenarios.
   - Substrato: `build/check.bat` (ruff + pytest, `--build` y `--fix`). Es lo que ejecuta CI, y corre igual en local.
   - De paso: el repo tenía 5 hallazgos de ruff y el `.venv` no tenía instaladas las dependencias de dev. Ambas cosas arregladas — sin eso el gate no servía.
-- [x] **Chequeo de actualización in-app** — `core/updates.py` + menú **Ayuda → Buscar actualizaciones...**. Lee un manifiesto JSON de la red, fuera del hilo de la UI. Al arrancar sólo deja un link en la barra de estado (sin modal); pedido a mano, contesta siempre. Sin auto-update, como estaba previsto.
-  - **Falta un paso operativo, no de código:** publicar el manifiesto en el NAS. Ver §4.5.
+- [x] **Chequeo de actualización in-app** — `core/updates.py` + opción **Buscar actualizaciones...** del pie del menú lateral. Consulta los Releases del repo público `Fenix-Corp/Utilities-Dist` (o un manifiesto JSON, como override), fuera del hilo de la UI; el aviso ofrece **Descargar**. Al arrancar sólo deja un link en la barra de estado (sin modal); pedido a mano, contesta siempre. Sin auto-update, como estaba previsto.
+  - El `.exe` lo sube `build_exe.bat` (paso 7) en cada versión nueva. Ver §4.5.
 - [x] **Empaquetado MSI** — `build/msi/fb2p_studio.wxs` + `build/msi.bat`, verificado (se inspeccionó la base del MSI generado: producto, versión, 5 archivos, acceso directo, filas de upgrade).
   - **WiX fijado en la versión 5 a propósito:** de la 6 en adelante hay que aceptar la EULA del *Open Source Maintenance Fee*, que para uso comercial es paga. La 5 es libre y usa el mismo esquema.
 - [x] **Localización** — las 85 cadenas de la UI pasaron a `self.tr(...)`; `build/i18n.bat` extrae y compila; `app.py` carga el `.qm` del locale del sistema. El idioma fuente sigue siendo el español: sin traducir nada, la app no cambia (verificado comparando las 79 cadenas que la UI muestra, antes y después: idénticas). El `.ts` de inglés está generado y sin traducir, listo para Qt Linguist.
 
 ### 4.5 Publicacion y remoto
 
-**Decidido:** el manifiesto sigue por defecto en el NAS, y el lector ahora acepta
-tambien una **URL https**, asi que apuntarlo a Google Drive o SharePoint es
-configuracion, no codigo. Los links de compartir de los dos servicios se
-convierten solos a su forma de descarga directa (`normalize_source`), porque el
-link que se copia del navegador devuelve HTML y no el JSON.
+**Decidido (2026-10-28):** las actualizaciones salen del repo publico
+`Fenix-Corp/Utilities-Dist` (el canal de las Utilidades de Desarrollo), como
+Releases `foxbin2prg-studio-vX.Y.Z` con el `.exe` adjunto. Reemplaza al
+`latest.json` del NAS, que no habia que publicar a mano en cada version y nunca se
+creo. El NAS y las URL https siguen aceptandose como override en Preferencias
+(`updates/manifest` en el .ini, misma clave de siempre), y los links de Drive y
+SharePoint se siguen convirtiendo a descarga directa (`normalize_source`).
 
-- [ ] **Publicar el manifiesto.** Crear `\192.168.0.16\Compilado_16\FoxBin2Prg-Studio\latest.json` y actualizarlo en cada release:
-
-  ```json
-  {
-    "version": "0.1.0",
-    "paquete": "\\192.168.0.16\Compilado_16\FoxBin2Prg-Studio\FoxBin2Prg-Studio-0.1.0.zip",
-    "notas": "Primera version MVP."
-  }
-  ```
-
-  Mientras no exista, el chequeo al arrancar falla en silencio (por diseno) y el manual avisa que no pudo leerlo. No se creo desde la sesion: es una carpeta compartida del equipo y escribir ahi es decision del usuario.
-
-  Para las maquinas que no ven el NAS, subir ese mismo JSON a Drive o SharePoint y pegar el link en **Preferencias → Manifiesto de versiones**. En Drive el archivo tiene que quedar accesible "para cualquiera con el link", y conviene que las notas no digan nada que no pueda ser publico.
+- [x] **Publicacion desde el build.** `build_exe.bat` termina (paso 7) llamando a `build\publish.bat`, que crea el Release con `gh release create ... --latest=false` y sube el `.exe` y el `.zip`. `--latest=false` para no quitarle a las utilidades la marca *Latest* del repo.
+  - **Solo versiones nuevas:** si el Release ya existe sale con codigo 2 y no sube nada (`--republish` / `--force` para reemplazar). Sin pruebas no hay publicacion (`--nocheck` implica `--nopublish`).
+  - **Verificado** con un `gh` de mentira que registra los comandos: version nueva (create), ya existe (omitido, codigo 2), `--force` (upload `--clobber`), sin sesion (falla) y el recorrido completo de `build_exe.bat`. La subida real a GitHub **no se ejecuto desde la sesion**: es un repo publico del equipo y publicar es decision del usuario.
+  - Lectura verificada contra GitHub real: mientras no haya un Release `foxbin2prg-studio-v*`, el chequeo contesta «el canal no tiene ninguna version publicada de FoxBin2Prg-Studio».
+- **Canal compartido:** el launcher del cajon lista los 50 Releases mas recientes y filtra por `fnxUtilidades-v`; Studio lista 100 y filtra por `foxbin2prg-studio-v`. Si algun dia se acumulan muchos Releases de Studio, convendria que el launcher pagine.
+- **Limite de la API:** 60 consultas/hora por IP sin token. Si molesta en una red compartida habria que agregar un token opcional (el launcher del cajon ya lo hace con `FNX_GH_TOKEN`); Studio hoy no lleva ninguno.
 
 - [x] **Repositorio publicado** en <https://github.com/Fenix-Corp/FoxBin2Prg-Studio> (privado), con `master` y `dev`. El historial se reviso antes de subirlo y no tiene secretos; lo unico interno son la IP del NAS y el link de SharePoint, aceptables en un repo privado (si algun dia se hiciera publico, habria que sacarlos a configuracion). El `bundled/foxbin2prg/` es redistribuible (CC BY 4.0, con atribucion). Total versionado: 1,2 MB.
 

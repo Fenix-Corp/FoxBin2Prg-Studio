@@ -118,20 +118,37 @@ Para sumar un idioma, agregarlo a `IDIOMAS` en `build/i18n.bat`. En runtime, `ap
 
 ### Aviso de versión nueva
 
-Studio lee un manifiesto JSON al arrancar y avisa con un toast si hay una versión más nueva. **Sólo avisa**: no descarga ni instala nada.
+Studio consulta al arrancar el **canal de distribución** —el repo público [`Fenix-Corp/Utilities-Dist`](https://github.com/Fenix-Corp/Utilities-Dist), el mismo de las Utilidades de Desarrollo— y avisa con un toast si hay una versión más nueva. **Sólo avisa**: el aviso ofrece **Descargar** (abre el enlace del `.exe`), pero no instala nada. También se puede pedir a mano con **Buscar actualizaciones...**, al pie del menú lateral.
 
-El origen se configura en **Herramientas → Preferencias** y admite las dos formas:
+Cada versión de Studio es un Release de ese repo, con la etiqueta `foxbin2prg-studio-vX.Y.Z` y el `FoxBin2Prg-Studio.exe` adjunto (el prefijo propio lo distingue de las etiquetas `fnxUtilidades-v*` de las otras utilidades, con las que comparte el canal). Como el repo es público, Studio lo lee sin token ni credenciales.
+
+**Publicar una versión nueva** lo hace la propia compilación:
+
+1. Sube `version` en `pyproject.toml`.
+2. Ejecuta `build_exe.bat`. Al final (paso 7) sube el `.exe` y el `.zip` al canal con `build\publish.bat`.
+
+Reglas del paso 7:
+
+- **Solo publica una versión nueva.** Si el Release ya existe no toca nada y lo dice (código 2): así no se pisa un `.exe` que alguien pudo haber bajado. `build_exe.bat --republish` reemplaza los archivos de la versión existente.
+- **No publica sin pasar las pruebas:** `--nocheck` implica `--nopublish`.
+- `--nopublish` compila y empaqueta sin subir nada; `--dry-run` muestra qué subiría.
+- Requiere [`gh`](https://cli.github.com) con sesión (`gh auth login`) y permiso de escritura en `Utilities-Dist`. Si la subida falla, el build queda hecho en `dist\` y `release\`; se reintenta solo la subida con `build\publish.bat`.
+
+El origen se puede cambiar en **Preferencias** (pie del menú lateral) y admite tres formas:
 
 | Origen | Ejemplo |
 |---|---|
-| Carpeta de red (por defecto) | `\192.168.0.16\Compilado_16\FoxBin2Prg-Studio\latest.json` |
-| URL https | un link de Google Drive o SharePoint |
+| Repo de GitHub (por defecto) | `https://github.com/Fenix-Corp/Utilities-Dist.git` |
+| Manifiesto JSON en una carpeta de red | `\\192.168.0.16\Compilado_16\FoxBin2Prg-Studio\latest.json` |
+| Manifiesto JSON en una URL https | un link de Google Drive o SharePoint |
 
-Los links de compartir de Drive y SharePoint se convierten solos a su forma de descarga directa: el link que se copia del navegador devuelve una página HTML, no el JSON. La lectura corre fuera del hilo de la UI y con timeout, así que un NAS caído o sin red no demora el arranque.
+Los links de compartir de Drive y SharePoint se convierten solos a su forma de descarga directa: el link que se copia del navegador devuelve una página HTML, no el JSON. La consulta corre fuera del hilo de la UI y con timeout, así que estar sin red no demora el arranque.
+
+> **Límite de GitHub:** sin token la API permite 60 consultas por hora y por IP. Una oficina que sale por una sola IP puede agotarlo; en ese caso el chequeo manual lo dice («GitHub limitó las consultas») y el del arranque calla.
 
 ### Temas
 
-Hay tres, elegibles en **Herramientas → Preferencias** y aplicables sin reiniciar:
+Hay tres, elegibles en **Preferencias** (pie del menú lateral) o en el menú **Tema** y aplicables sin reiniciar:
 
 | Tema | Qué es |
 |---|---|
