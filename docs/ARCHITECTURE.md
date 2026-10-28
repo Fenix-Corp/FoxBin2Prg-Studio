@@ -33,7 +33,7 @@ El CLI sólo entrega `ErrorLevel 0/1` y un CSV a stdout con mensajes localizados
 - **`core.bridge`**: envuelve `QProcess`. Genera `job.ini`, lanza VFP con el driver, escucha `finished()`.
 - **`core.ipc`**: `QFileSystemWatcher` sobre `progress.jsonl`, emite señales Qt por evento.
 - **`core.settings`**: wrapper sobre `QSettings` (ubicación: `%APPDATA%\FoxBin2Prg-Studio\`).
-- **`ui.*`**: PySide6, `QMainWindow` con un menu lateral (`ui.sidenav.SideNav`) y un `QStackedWidget`: la barra solo navega y la ventana muestra la pagina que toca. Las paginas que ejecutan jobs (Convertir, Proyecto) comparten `ui.job_runner.JobRunner` (ciclo de vida del bridge + volcado de eventos al log) y `ui.widgets.advanced_options.AdvancedOptions`.
+- **`ui.*`**: PySide6, `QMainWindow` con un menu lateral (`ui.sidenav.SideNav`) y un `QStackedWidget`: la barra solo navega y la ventana muestra la pagina que toca. La pagina **Manual** (`ui.tab_manual`) muestra el `LEEME.md` con `ui.widgets.markdown_viewer.MarkdownViewer` (indice, busqueda, enlaces internos); `core.discovery.manual_path()` lo ubica en el repo o dentro del `.exe`. Las paginas que ejecutan jobs (Convertir, Proyecto) comparten `ui.job_runner.JobRunner` (ciclo de vida del bridge + volcado de eventos al log) y `ui.widgets.advanced_options.AdvancedOptions`.
 
 ### Driver VFP (`vfp_bridge/`)
 

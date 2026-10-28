@@ -1,17 +1,23 @@
 ================================================================================
-  FoxBin2Prg-Studio 0.1.0
-  GUI de administracion para FoxBin2Prg — utilitario generico VFP9
-  ADS Software — 2026
+  FoxBin2Prg-Studio
+  GUI de administracion para FoxBin2Prg - utilitario generico para proyectos VFP9
+  ADS Software - 2026
 ================================================================================
+
+EL MANUAL DE USUARIO COMPLETO esta en LEEME.md (se lee con cualquier visor de
+Markdown) y DENTRO de Studio:
+
+    menu lateral -> Ayuda -> Manual        (o la tecla F1)
+
+Este archivo es solo un resumen para quien lo abre con el Bloc de notas.
 
 
 CONTENIDO DEL PAQUETE
 ---------------------
 
-  FoxBin2Prg-Studio.exe   Ejecutable autocontenido (~48 MB).
-                          Incluye Python + Qt + PySide6 + FoxBin2Prg embebido
-                          (v1.21, redistribuido bajo CC BY 4.0).
-
+  FoxBin2Prg-Studio.exe   Ejecutable autocontenido. Incluye Python + Qt + PySide6
+                          + FoxBin2Prg embebido (redistribuido bajo CC BY 4.0).
+  LEEME.md                Manual de usuario.
   LEEME.txt               Este archivo.
   LICENCIA.txt            Terminos de licencia y atribuciones.
   CAMBIOS.txt             Historial de cambios.
@@ -20,114 +26,29 @@ CONTENIDO DEL PAQUETE
 REQUISITOS
 ----------
 
-  Windows 10 / 11 (64 bits).
-
-  Visual FoxPro 9 SP2 (build >= 3504) instalado en la maquina.
-  Ver la seccion PRE-REQUISITO mas abajo.
-
-  Rutas tipicas que la GUI autodetecta:
-    - C:\Fenix\AdsFenix\Librerias\vfp9.exe
-    - C:\Program Files (x86)\Microsoft Visual FoxPro 9\vfp9.exe
-
-  Si vfp9.exe esta en otro lugar: menu Herramientas > Preferencias.
-
-  Nada mas hace falta. FoxBin2Prg (FoxBin2Prg.EXE + filename_caps.exe +
-  filename_caps.cfg) ya viene embebido dentro del ejecutable: no hay que
-  instalarlo ni copiar ninguna carpeta. La pestana "Acerca de" lo muestra
-  como "(embebido en Studio)".
-
-  Si preferis usar otra copia de FoxBin2Prg, indica su carpeta en el menu
-  Herramientas > Preferencias (o en la variable de entorno FB2P_HOME).
-  Ahi "Acerca de" la mostrara como "(externo)".
+  - Windows 10 / 11 (64 bits).
+  - Visual FoxPro 9 SP2 (build 3504 o superior). Se verifica en VFP9 con:
+        ? VERSION(4)
+    Si es menor, ejecutar setup_bussinesRule.exe, disponible en el NAS
+    (\\192.168.0.16\Compilado_16) y en SharePoint (SOPORTE_ADS).
 
 
-PRE-REQUISITO: QUE VFP9 SEA SP2 (BUILD >= 3504)
------------------------------------------------
-
-  FoxBin2Prg corre DENTRO de Visual FoxPro 9 y necesita el Service Pack 2.
-  Con un build anterior las conversiones fallan.
-
-  Como verificar el build. En la ventana de comandos de VFP9:
-
-      ? VERSION(4)      && 09.00.0000.3504 o superior = SP2
-
-  Tambien aparece en el log de Studio: la linea job_start trae el campo
-  vfpVersion.
-
-  Como actualizar. Si el build es menor a 3504, ejecutar el instalador
-  setup_bussinesRule.exe, que deja VFP9 en SP2. Esta disponible en:
-
-    NAS          \\192.168.0.16\Compilado_16
-
-    SharePoint   (link en una sola linea, copiarlo entero)
-    https://adssoftware.sharepoint.com/:f:/s/SOPORTE_ADS/IgDgpcrWtLgYQZsc32SzmgLRAVF8stWKYEFlzKkmYGi6FVw?e=sqfAVY
-
-  Terminada la instalacion, volver a correr ? VERSION(4) para confirmar
-  el build.
-
-
-INSTALACION
------------
-
-  1. Copiar el .exe donde quieran (Escritorio, C:\Tools\, red, no importa).
-  2. Doble click en FoxBin2Prg-Studio.exe.
-
-  No requiere instalador. No modifica el registro. No pide permisos de
-  administrador.
-
-  Las preferencias del usuario (rutas override, opciones por defecto) se
-  guardan en:
-    %APPDATA%\ADS Software\FoxBin2Prg-Studio.ini
-
-
-PRIMER USO
+USO RAPIDO
 ----------
 
-  1. Abrir FoxBin2Prg-Studio.exe.
+  1. Copiar FoxBin2Prg-Studio.exe donde se quiera y abrirlo (no requiere
+     instalador ni permisos de administrador).
+  2. Herramientas -> Convertir: un archivo (.scx, .vcx, .frx...).
+     Herramientas -> Proyecto: un proyecto completo (.pjx / .pj2).
+  3. Pulsar Ejecutar y revisar la pestana Resultados.
 
-  2. Ir a la pestana "Acerca de" para verificar que detecto vfp9.exe.
-     Si dice "<no encontrado>", ir a Herramientas > Preferencias y setear
-     la ruta manualmente.
-
-  3. Ir a la pestana "Convertir".
-
-  4. Arrastrar sobre el campo "Archivo" cualquier binario VFP:
-       - .scx / .sct (formularios)
-       - .vcx / .vct (class libraries)
-       - .pjx / .pjt (proyectos)
-       - .frx / .lbx / .mnx / .dbc / .dbf
-     O el archivo de texto equivalente (.sc2 / .vc2 / .pj2 / etc).
-
-  5. La operacion (Bin -> Prg o Prg -> Bin) se detecta por la extension.
-     Se puede forzar con los radio buttons.
-
-  6. Click en "Ejecutar". El log al pie muestra el progreso en vivo:
-       job_start -> op_start -> file_processed -> op_done -> job_done
+  Antes de convertir algo importante, marcar "Solo simular (dry-run)" en
+  Opciones avanzadas: muestra que se procesaria sin tocar el disco.
 
 
-OPCIONES AVANZADAS
-------------------
+SOPORTE
+-------
 
-  Colapsables (por defecto ocultas):
-
-    Limpiar timestamps          Recomendado ON. Reduce diferencias falsas
-                                en control de version.
-    Limpiar UniqueID            Recomendado ON. Idem.
-    Recompilar tras generar     Recomendado ON. Fuerza recompilacion del
-                                binario tras Prg -> Bin.
-    Solo simular (dry-run)      Muestra que archivos se procesarian sin
-                                tocar disco. Requiere l_ProcessFiles=.F.
-                                del Object API.
-    Backups (n .bak)            Cuantos niveles de .bak crear. 0 = no backup.
-    Debug                       0 = sin log, 1 = log por archivo, 2 = extendido.
-
-
-REPORTAR PROBLEMAS
-------------------
-
-  Contacto: desarrolloads@adsecuador.com
-
-
-================================================================================
-  FIN DEL LEEME
-================================================================================
+  desarrolloads@adsecuador.com
+  Indicar la version (titulo de la ventana), lo que muestra "Acerca de" y el
+  contenido de la pestana Log.

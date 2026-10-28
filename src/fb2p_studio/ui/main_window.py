@@ -31,6 +31,7 @@ from fb2p_studio.ui.dialog_preferences import PreferencesDialog
 from fb2p_studio.ui.sidenav import SideNav
 from fb2p_studio.ui.tab_about import AboutTab
 from fb2p_studio.ui.tab_convert import ConvertTab
+from fb2p_studio.ui.tab_manual import ManualTab
 from fb2p_studio.ui.tab_project import ProjectTab
 from fb2p_studio.ui.theme import LogColors
 from fb2p_studio.ui.widgets.corporate_header import CorporateHeader
@@ -40,6 +41,7 @@ from fb2p_studio.ui.widgets.toast import Toast
 GLYPH_CONVERT = 0xE8AB
 GLYPH_PROJECT = 0xE838
 GLYPH_ABOUT = 0xE946
+GLYPH_MANUAL = 0xE897
 GLYPH_PREFERENCES = 0xE713
 GLYPH_UPDATES = 0xE895
 
@@ -59,6 +61,7 @@ class MainWindow(QMainWindow):
         self._tab_convert = ConvertTab(self._settings, log_colors)
         self._tab_project = ProjectTab(self._settings, log_colors)
         self._tab_about = AboutTab(self._settings)
+        self._tab_manual = ManualTab()
 
         # La banda corporativa sólo existe con el tema ADS; con Claro y Oscuro
         # la ventana se mimetiza con Windows y la banda estorbaria.
@@ -119,14 +122,27 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------ menu lateral
     def _mount_pages(self) -> None:
         """Arma las paginas y sus opciones en el menu lateral."""
-        self._nav.add_group(self.tr("Herramientas"))
-        for titulo, glifo, pagina in (
-            (self.tr("Convertir"), GLYPH_CONVERT, self._tab_convert),
-            (self.tr("Proyecto"), GLYPH_PROJECT, self._tab_project),
-            (self.tr("Acerca de"), GLYPH_ABOUT, self._tab_about),
-        ):
-            self._pages.addWidget(pagina)
-            self._nav.add_page(titulo, glifo)
+        grupos = (
+            (
+                self.tr("Herramientas"),
+                (
+                    (self.tr("Convertir"), GLYPH_CONVERT, self._tab_convert),
+                    (self.tr("Proyecto"), GLYPH_PROJECT, self._tab_project),
+                ),
+            ),
+            (
+                self.tr("Ayuda"),
+                (
+                    (self.tr("Manual"), GLYPH_MANUAL, self._tab_manual),
+                    (self.tr("Acerca de"), GLYPH_ABOUT, self._tab_about),
+                ),
+            ),
+        )
+        for grupo, paginas in grupos:
+            self._nav.add_group(grupo)
+            for titulo, glifo, pagina in paginas:
+                self._pages.addWidget(pagina)
+                self._nav.add_page(titulo, glifo)
 
     def _show_page(self, indice: int) -> None:
         """Muestra la pagina elegida en el menu lateral, con su encabezado."""
@@ -179,6 +195,20 @@ class MainWindow(QMainWindow):
         # «Archivo > Salir» ya no existe: queda su atajo.
         salir = QShortcut(QKeySequence.StandardKey.Quit, self)
         salir.activated.connect(self.close)
+        # F1 abre el manual; Ctrl+F busca en el, pero solo cuando se esta viendo
+        # (en las otras paginas Ctrl+F no tiene nada que buscar).
+        ayuda = QShortcut(QKeySequence(Qt.Key.Key_F1), self)
+        ayuda.activated.connect(self.show_manual)
+        buscar = QShortcut(QKeySequence.StandardKey.Find, self)
+        buscar.activated.connect(self._search_manual)
+
+    def show_manual(self) -> None:
+        """Va a la pagina del manual de usuario."""
+        self._nav.select(self._pages.indexOf(self._tab_manual))
+
+    def _search_manual(self) -> None:
+        if self._pages.currentWidget() is self._tab_manual:
+            self._tab_manual.focus_search()
 
     def _set_theme_from_menu(self, tema: str) -> None:
         """Elige tema desde el menu lateral: se aplica y se recuerda."""
@@ -212,6 +242,7 @@ class MainWindow(QMainWindow):
         self._decorate(theme.current())
         self._tab_convert.set_log_colors(colores)
         self._tab_project.set_log_colors(colores)
+        self._tab_manual.refresh_theme()
 
     def _decorate(self, tema: str) -> None:
         """Lo que distingue visualmente a un tema del otro, fuera del QSS.

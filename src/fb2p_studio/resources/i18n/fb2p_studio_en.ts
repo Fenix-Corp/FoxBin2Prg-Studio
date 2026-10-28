@@ -303,98 +303,108 @@ Si es un .db2 / .fk2 / .me2, se habilita poniendo n_XXX_Conversion_Support=2 en 
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../../ui/main_window.py" line="124"/>
+        <location filename="../../ui/main_window.py" line="129"/>
         <source>Convertir</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="125"/>
+        <location filename="../../ui/main_window.py" line="130"/>
         <source>Proyecto</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="126"/>
+        <location filename="../../ui/main_window.py" line="137"/>
         <source>Acerca de</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="101"/>
+        <location filename="../../ui/main_window.py" line="104"/>
         <source>Listo</source>
         <extracomment>Glifos de Segoe Fluent Icons / MDL2 de cada opcion del menu lateral.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="161"/>
+        <location filename="../../ui/main_window.py" line="177"/>
         <source>Preferencias...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="122"/>
+        <location filename="../../ui/main_window.py" line="127"/>
         <source>Herramientas</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="158"/>
+        <location filename="../../ui/main_window.py" line="134"/>
+        <source>Ayuda</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/main_window.py" line="136"/>
+        <source>Manual</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/main_window.py" line="174"/>
         <source>Preferencias</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="159"/>
+        <location filename="../../ui/main_window.py" line="175"/>
         <source>Tema</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="164"/>
+        <location filename="../../ui/main_window.py" line="180"/>
         <source>Buscar actualizaciones...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="187"/>
+        <location filename="../../ui/main_window.py" line="217"/>
         <source>Tema: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="196"/>
+        <location filename="../../ui/main_window.py" line="226"/>
         <source>Preferencias actualizadas</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="255"/>
+        <location filename="../../ui/main_window.py" line="286"/>
         <source>Buscando actualizaciones...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="262"/>
+        <location filename="../../ui/main_window.py" line="293"/>
         <source>Hay una version nueva: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="272"/>
+        <location filename="../../ui/main_window.py" line="303"/>
         <source>Hay una version nueva de FoxBin2Prg-Studio: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="274"/>
+        <location filename="../../ui/main_window.py" line="305"/>
         <source>Ver</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="285"/>
+        <location filename="../../ui/main_window.py" line="316"/>
         <source>Sin actualizaciones</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="286"/>
+        <location filename="../../ui/main_window.py" line="317"/>
         <source>Estas en la ultima version publicada ({0}).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="295"/>
+        <location filename="../../ui/main_window.py" line="326"/>
         <source>No se pudo verificar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="297"/>
+        <location filename="../../ui/main_window.py" line="328"/>
         <source>No se pudo consultar la ultima version publicada.
 
 {0}
@@ -403,34 +413,86 @@ Se puede cambiar su ubicacion en Preferencias, al pie del menu lateral.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="307"/>
+        <location filename="../../ui/main_window.py" line="338"/>
         <source>Hay una version nueva: &lt;b&gt;{0}&lt;/b&gt; (tenes la {1}).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="314"/>
+        <location filename="../../ui/main_window.py" line="345"/>
         <source>Actualizacion disponible</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="321"/>
+        <location filename="../../ui/main_window.py" line="352"/>
         <source>Paquete:
 {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="324"/>
+        <location filename="../../ui/main_window.py" line="355"/>
         <source>Abrir carpeta</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="324"/>
+        <location filename="../../ui/main_window.py" line="355"/>
         <source>Descargar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="328"/>
+        <location filename="../../ui/main_window.py" line="359"/>
         <source>Cerrar</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ManualTab</name>
+    <message>
+        <location filename="../../ui/tab_manual.py" line="34"/>
+        <source>Abrir carpeta del manual</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/tab_manual.py" line="50"/>
+        <source>No se encontró el archivo del manual.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/tab_manual.py" line="69"/>
+        <source>Revisa el **LEEME.md** que viene junto al ejecutable, o escribe a **desarrolloads@adsecuador.com**.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>MarkdownViewer</name>
+    <message>
+        <location filename="../../ui/widgets/markdown_viewer.py" line="98"/>
+        <source>Buscar en el manual...</source>
+        <extracomment>Niveles de encabezado que entran al indice. El 4 en adelante son detalle. Posicion (bloque) de cada item del indice dentro del documento.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/markdown_viewer.py" line="101"/>
+        <source>Anterior</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/markdown_viewer.py" line="103"/>
+        <source>Siguiente</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/markdown_viewer.py" line="261"/>
+        <source>Volvió al inicio</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/markdown_viewer.py" line="261"/>
+        <source>Volvió al final</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/markdown_viewer.py" line="263"/>
+        <source>Sin resultados</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

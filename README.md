@@ -14,7 +14,10 @@ MVP en construcción. Tabs previstas:
 | Proyecto | Proyecto completo (`*` / `*-`), con pre-flight del contenido | ✅ |
 | Diff | `Fb2P_Diff.EXE` | ⏳ fase 2 |
 | Config | Templates `.cfg` y `.dbf.cfg` | ⏳ fase 2 |
+| Manual | El `LEEME.md` renderizado, con índice y búsqueda (**F1**) | ✅ |
 | Acerca de | Diagnóstico + `VERNO` | 🚧 MVP |
+
+**El manual de usuario es el `release/_template/LEEME.md`**: una sola fuente, que se reparte en el zip y el MSI y que el `.spec` embebe en el `.exe` para la página **Ayuda → Manual**. Si cambia una pantalla, se corrige ahí; `tests/test_manual.py` falla si una página o un atajo queda sin documentar.
 
 ## Requisitos de la máquina destino
 

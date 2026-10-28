@@ -142,6 +142,25 @@ def resources_dir() -> Path:
     return Path(__file__).resolve().parents[1] / "resources"
 
 
+#: Nombre del manual de usuario. Es el LEEME.md que viaja en el zip y en el MSI.
+MANUAL_NAME = "LEEME.md"
+
+
+def manual_path() -> Path | None:
+    """Ruta al manual de usuario (LEEME.md), o None si falta.
+
+    Una sola fuente: `release/_template/LEEME.md`, el mismo archivo que se
+    reparte en el zip y el MSI. Desde fuente se lee de ahi; el `.spec` lo
+    embebe en el `.exe`, donde vive junto a los demas recursos.
+    """
+    base = _frozen_base()
+    if base is not None:
+        candidate = resources_dir() / MANUAL_NAME
+    else:
+        candidate = _repo_root() / "release" / "_template" / MANUAL_NAME
+    return candidate if candidate.is_file() else None
+
+
 def app_icon_path() -> Path | None:
     """Ruta al .ico de la app, o None si falta (se genera con build/make_icon.py)."""
     candidate = resources_dir() / "fb2p_studio.ico"

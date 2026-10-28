@@ -344,6 +344,28 @@ QTreeWidget::item:selected:!active {
     border-color: #a9c0d8;
     color: %(primary_dark)s;
 }
+/* Indice del manual: los mismos cuatro estados que el arbol. */
+QListWidget#indiceManual, QTextBrowser#documentoManual {
+    border: 1px solid %(border)s;
+    background: %(surface)s;
+    outline: none;
+}
+QListWidget#indiceManual::item { padding: 4px 6px; border: 1px solid transparent; }
+QListWidget#indiceManual::item:hover {
+    background: %(hover)s;
+    border-color: #c3d2e4;
+    color: %(primary_dark)s;
+}
+QListWidget#indiceManual::item:selected {
+    background: %(primary)s;
+    border-color: %(primary_dark)s;
+    color: %(on_primary)s;
+}
+QListWidget#indiceManual::item:selected:!active {
+    background: %(sel_inactive)s;
+    border-color: #a9c0d8;
+    color: %(primary_dark)s;
+}
 QHeaderView::section {
     background: %(surface_alt)s;
     border: none;

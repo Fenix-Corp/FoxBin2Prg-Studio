@@ -17,6 +17,7 @@ BRIDGE = ROOT / "vfp_bridge"
 BUNDLED = ROOT / "bundled" / "foxbin2prg"
 RESOURCES = ROOT / "src" / "fb2p_studio" / "resources"
 ICON = RESOURCES / "fb2p_studio.ico"
+MANUAL = ROOT / "release" / "_template" / "LEEME.md"
 
 if not ICON.is_file():
     raise SystemExit(
@@ -24,9 +25,15 @@ if not ICON.is_file():
         r".venv\Scripts\python.exe build\make_icon.py"
     )
 
+if not MANUAL.is_file():
+    raise SystemExit(f"Falta el manual {MANUAL}: lo embebe el .exe (Ayuda > Manual).")
+
 datas = [
     # Icono de la app (tambien se aplica como icono del .exe, mas abajo)
     (str(ICON), "fb2p_studio/resources"),
+    # Manual de usuario: el LEEME.md que tambien se reparte en el zip y el MSI.
+    # Studio lo muestra en Ayuda > Manual.
+    (str(MANUAL), "fb2p_studio/resources"),
     (str(BRIDGE / "fb2p_bridge.prg"), "vfp_bridge"),
     (str(BRIDGE / "fb2p_bridge.fpw"), "vfp_bridge"),
     # FoxBin2Prg redistribuible (CC BY 4.0, ver bundled/foxbin2prg/ATTRIBUTION.md)
