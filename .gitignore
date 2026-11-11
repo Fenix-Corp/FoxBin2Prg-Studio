@@ -60,3 +60,10 @@ release/*.wixpdb
 
 # Temporales del lanzador (build\launcher.bat) y copia de la version publicada
 build/launcher_work/
+
+# Lanzador ejecutado desde fuente (python launcher/launcher.py): trabaja en su propia
+# carpeta y deja ahi el .exe bajado, la marca y el log
+launcher/FoxBin2Prg-Studio.exe*
+launcher/installed.txt
+launcher/launcher.log
+launcher/.escritura.tmp

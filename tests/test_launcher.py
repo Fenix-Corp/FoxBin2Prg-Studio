@@ -16,7 +16,11 @@ from __future__ import annotations
 import importlib.util
 import io
 import json
+import os
 import re
+import shutil
+import subprocess
+import sys
 import urllib.error
 from pathlib import Path
 
@@ -276,14 +280,132 @@ def test_la_carpeta_se_puede_redefinir_por_entorno(tmp_path: Path, monkeypatch: 
     destino = tmp_path / "otra" / "carpeta"
     monkeypatch.setenv(L.ENV_INSTALL_DIR, str(destino))
 
-    assert L.cache_dir() == destino
+    assert L.install_dir() == destino
     assert destino.is_dir()
 
 
-def test_la_carpeta_por_defecto_es_unica_por_maquina() -> None:
-    """Sin override es una ruta fija, no una por usuario (RDP): nada de %LOCALAPPDATA%."""
-    assert L.DEFAULT_INSTALL_DIR.upper().startswith("C:\\")
-    assert "appdata" not in L.DEFAULT_INSTALL_DIR.lower()
+def test_por_defecto_trabaja_en_la_carpeta_del_lanzador_compilado(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """El .exe de Studio se reemplaza JUNTO al lanzador, no en una carpeta oculta."""
+    monkeypatch.delenv(L.ENV_INSTALL_DIR, raising=False)
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "executable", str(tmp_path / "FoxBin2Prg-Studio-Launcher.exe"))
+
+    assert L.install_dir() == tmp_path.resolve()
+
+
+def test_desde_fuente_trabaja_en_la_carpeta_del_script(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv(L.ENV_INSTALL_DIR, raising=False)
+    monkeypatch.delattr(sys, "frozen", raising=False)
+
+    assert L.install_dir() == RUTA.parent
+
+
+def test_ya_no_hay_una_carpeta_comun_oculta() -> None:
+    assert not hasattr(L, "DEFAULT_INSTALL_DIR")
+    assert "Fnx_Backup" not in RUTA.read_text(encoding="utf-8")
+
+
+def test_can_write(tmp_path: Path) -> None:
+    assert L.can_write(tmp_path) is True
+    assert not list(tmp_path.iterdir()), "no debe dejar rastro"
+    assert L.can_write(tmp_path / "no" / "existe") is False
+
+
+# ------------------------------------------- reemplazo del .exe (tambien en uso)
+def test_replace_exe_sobrescribe_el_exe(tmp_path: Path) -> None:
+    destino = tmp_path / L.ASSET_NAME
+    destino.write_bytes(b"viejo")
+    nuevo = tmp_path / (L.ASSET_NAME + ".part")
+    nuevo.write_bytes(b"nuevo")
+
+    L.replace_exe(nuevo, destino)
+
+    assert destino.read_bytes() == b"nuevo"
+    assert not nuevo.exists()
+    assert not (tmp_path / (L.ASSET_NAME + L.OLD_SUFFIX)).exists(), "sin .old si no hizo falta"
+
+
+@pytest.fixture
+def exe_en_uso(tmp_path: Path):  # noqa: ANN201
+    """Un .exe REALMENTE corriendo, con el nombre de Studio, para probar el bloqueo de Windows."""
+    if sys.platform != "win32":
+        pytest.skip("renombrar un .exe en uso es una particularidad de Windows")
+    destino = tmp_path / L.ASSET_NAME
+    shutil.copy(Path(os.environ["SYSTEMROOT"]) / "System32" / "PING.EXE", destino)
+    proceso = subprocess.Popen(  # noqa: S603
+        [str(destino), "-n", "40", "127.0.0.1"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+    )
+    try:
+        yield destino, proceso
+    finally:
+        proceso.kill()
+        proceso.wait()
+
+
+def test_un_exe_en_uso_no_se_puede_sobrescribir_pero_si_reemplazar(tmp_path: Path, exe_en_uso) -> None:  # noqa: ANN001
+    destino, proceso = exe_en_uso
+    nuevo = tmp_path / (L.ASSET_NAME + ".part")
+    nuevo.write_bytes(b"MZ nuevo")
+
+    # Precondicion: Windows de verdad impide sobrescribirlo. Sin esto la prueba no probaria nada.
+    with pytest.raises(PermissionError):
+        nuevo.replace(destino)
+
+    L.replace_exe(nuevo, destino)
+
+    assert destino.read_bytes() == b"MZ nuevo"
+    viejo = tmp_path / (L.ASSET_NAME + L.OLD_SUFFIX)
+    assert viejo.exists(), "el exe en uso se aparta, no se pierde"
+    assert proceso.poll() is None, "la instancia abierta sigue corriendo"
+
+    # Mientras siga abierto el .old no se puede borrar; cerrado, si.
+    L.cleanup_old(tmp_path)
+    assert viejo.exists()
+    proceso.kill()
+    proceso.wait()
+    L.cleanup_old(tmp_path)
+    assert not viejo.exists()
+
+
+def test_si_el_reemplazo_falla_se_deshace_y_queda_el_exe_anterior(
+    tmp_path: Path, exe_en_uso, monkeypatch: pytest.MonkeyPatch  # noqa: ANN001
+) -> None:
+    destino, _proceso = exe_en_uso
+    contenido = destino.read_bytes()
+    nuevo = tmp_path / (L.ASSET_NAME + ".part")
+    nuevo.write_bytes(b"MZ nuevo")
+
+    reales = Path.replace
+    llamadas: list[int] = []
+
+    def replace(self: Path, target):  # noqa: ANN001, ANN202
+        llamadas.append(1)
+        if len(llamadas) == 2:  # el segundo: ya con el viejo apartado
+            raise OSError("disco lleno")
+        return reales(self, target)
+
+    monkeypatch.setattr(Path, "replace", replace)
+
+    with pytest.raises(OSError, match="disco lleno"):
+        L.replace_exe(nuevo, destino)
+
+    assert destino.read_bytes() == contenido, "tiene que volver el exe de antes, no quedar sin exe"
+    assert not (tmp_path / (L.ASSET_NAME + L.OLD_SUFFIX)).exists()
+
+
+def test_download_reemplaza_el_exe_aunque_studio_este_abierto(
+    tmp_path: Path, exe_en_uso, monkeypatch: pytest.MonkeyPatch  # noqa: ANN001
+) -> None:
+    destino, proceso = exe_en_uso
+    _red_falsa(monkeypatch, exe=b"MZ" + b"y" * 5000)
+
+    assert L.download_api(TAG + "0.2.0", tmp_path, say=lambda _m: None) is True
+
+    assert destino.read_bytes().startswith(b"MZ" + b"y")
+    assert proceso.poll() is None
+    assert not (tmp_path / (L.ASSET_NAME + ".part")).exists()
 
 
 def test_el_log_anota_con_fecha_y_se_reinicia_si_crece(tmp_path: Path) -> None:
@@ -393,3 +515,12 @@ def test_una_consola_que_no_puede_mostrar_acentos_no_tumba_al_lanzador(
 
     assert "conexión" in (tmp_path / L.LOG_NAME).read_text(encoding="utf-8"), "el log UTF-8 lo conserva"
     assert "conexi?n" in capsys.readouterr().out
+
+
+def test_el_paquete_incluye_la_marca_que_lee_el_lanzador() -> None:
+    """El lanzador y Studio viajan juntos en el zip; sin `installed.txt` el primer arranque
+    bajaria a ciegas un .exe que ya esta ahi."""
+    paquete = (RAIZ / "build" / "package.bat").read_text(encoding="utf-8")
+
+    assert L.MARKER_NAME in paquete
+    assert f"echo {L.TAG_PREFIX}%VERSION%" in paquete

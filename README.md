@@ -125,10 +125,12 @@ Mismo esquema que las Utilidades de Desarrollo (`fnxLauncher`). El equipo **no a
 
 1. Consulta a la API pública de GitHub cuál es el último Release de Studio del **canal de distribución**, el repo público [`Fenix-Corp/Utilities-Dist`](https://github.com/Fenix-Corp/Utilities-Dist) (el de las Utilidades de Desarrollo; solo binarios, **sin token ni credenciales**).
 2. Lo compara con la marca local (`installed.txt`).
-3. Si hay una más nueva —o no hay ninguna copia— la baja a **una carpeta única por máquina**, `C:\Fnx_Backup\exes\foxbin2prg_studio` (override: variable `FNX_STUDIO_DIR`), para que en un servidor RDP el `.exe` no se duplique por usuario.
-4. Ejecuta esa copia.
+3. Si hay una más nueva —o no hay ninguna copia— la baja y **reemplaza el `FoxBin2Prg-Studio.exe` que está en la misma carpeta que el lanzador**. No hay una copia oculta en otro sitio: la carpeta del lanzador *es* la carpeta de Studio (el `.exe`, la marca `installed.txt` y el `launcher.log` viven juntos).
+4. Ejecuta Studio **desde esa misma carpeta**.
 
-Es tolerante a fallos: sin red abre la copia local; la descarga va a un `.part` que solo reemplaza al `.exe` al terminar, así que una descarga cortada, o un `.exe` en uso por otro usuario, nunca deja a nadie sin Studio. Deja un `launcher.log` en esa carpeta. Como el lanzador no se actualiza a sí mismo, cambia muy rara vez; se reparte una vez (va en el zip y como asset de cada Release).
+Es tolerante a fallos: sin red abre la copia local; la descarga va a un `.part` que solo reemplaza al `.exe` al terminar, así que una descarga cortada nunca deja a nadie sin Studio. **Si Studio está abierto**, su `.exe` no se puede sobrescribir, pero Windows sí deja renombrarlo: el lanzador lo aparta como `FoxBin2Prg-Studio.exe.old`, pone el nuevo en su lugar (la instancia abierta sigue funcionando) y borra el `.old` la próxima vez que nadie lo tenga abierto. Si el usuario no puede escribir en esa carpeta, el lanzador lo avisa en el log y abre la copia que haya. Como el lanzador no se actualiza a sí mismo, cambia muy rara vez; se reparte una vez (va en el zip y como asset de cada Release). Para trabajar en otra carpeta existe la variable de entorno `FNX_STUDIO_DIR`.
+
+El zip trae el lanzador, `FoxBin2Prg-Studio.exe` y un `installed.txt` con la etiqueta de esa versión, así que al descomprimirlo en una carpeta ya funciona y no se baja a ciegas lo que ya está ahí.
 
 **Si se abre el `.exe` directo** (sin lanzador), Studio sigue avisando por sí mismo: al arrancar consulta el mismo canal y muestra un toast; también **Buscar actualizaciones...** al pie del menú lateral. Ese aviso ofrece **Descargar** pero no instala nada.
 

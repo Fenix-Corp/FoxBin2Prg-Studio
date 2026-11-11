@@ -39,12 +39,13 @@ REQUISITOS
 USO RAPIDO
 ----------
 
-  1. Abrir FoxBin2Prg-Studio-Launcher.exe (o un acceso directo a el). La primera
-     vez baja la ultima version de Studio a C:\Fnx_Backup\exes\foxbin2prg_studio
-     y la abre; las siguientes solo comprueba si hay una mas nueva. Abrir el
-     lanzador ES actualizar. (Tambien sirve abrir FoxBin2Prg-Studio.exe directo,
-     pero entonces la actualizacion es manual.) No requiere instalador ni
-     permisos de administrador.
+  1. Descomprimir el paquete en la carpeta que se quiera y abrir
+     FoxBin2Prg-Studio-Launcher.exe (o un acceso directo a el). Cada vez comprueba
+     si hay una version nueva; si la hay, REEMPLAZA el FoxBin2Prg-Studio.exe que
+     esta junto a el y abre Studio desde esa misma carpeta. Abrir el lanzador ES
+     actualizar. Hace falta permiso de escritura en esa carpeta. (Tambien sirve
+     abrir FoxBin2Prg-Studio.exe directo, pero entonces la actualizacion es
+     manual.) No requiere instalador ni permisos de administrador.
   2. Herramientas -> Convertir: un archivo (.scx, .vcx, .frx...).
      Herramientas -> Proyecto: un proyecto completo (.pjx / .pj2).
   3. Pulsar Ejecutar y revisar la pestana Resultados.

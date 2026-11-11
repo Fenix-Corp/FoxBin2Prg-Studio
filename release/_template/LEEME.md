@@ -65,7 +65,7 @@ Terminada la instalación, vuelve a correr `? VERSION(4)` para confirmar el buil
 
 ## Instalación
 
-**Forma recomendada: el lanzador.** Copia `FoxBin2Prg-Studio-Launcher.exe` donde quieras (o crea un acceso directo a él) y ábrelo. La primera vez **baja la última versión de Studio** a una carpeta única de la máquina (`C:\Fnx_Backup\exes\foxbin2prg_studio`) y la abre; las siguientes veces solo comprueba si hay una más nueva. Así siempre abres la última versión, sin copiar nada a mano. Ver [Actualizaciones](#actualizaciones).
+**Forma recomendada: el lanzador.** Descomprime el paquete en la carpeta que quieras (Escritorio, `C:\Tools\`, una carpeta de red…) —o copia solo `FoxBin2Prg-Studio-Launcher.exe`— y abre el lanzador (o crea un acceso directo a él). Cada vez comprueba si hay una versión nueva; si la hay, **reemplaza el `FoxBin2Prg-Studio.exe` que está junto a él** y abre Studio desde esa misma carpeta. Si el lanzador está solo, la primera vez baja Studio ahí mismo. Así siempre abres la última versión, sin copiar nada a mano. Ver [Actualizaciones](#actualizaciones).
 
 **Alternativa: el `.exe` directo.** También funciona copiar `FoxBin2Prg-Studio.exe` donde quieras y abrirlo con doble clic; en ese caso la actualización es manual.
 
@@ -254,15 +254,16 @@ Abre Studio **siempre por el lanzador** (`FoxBin2Prg-Studio-Launcher.exe`). Cada
 
 1. Consulta cuál es la última versión publicada.
 2. La compara con la que ya hay en tu máquina.
-3. Si hay una más nueva, la **descarga** (verás el avance en MB en una ventana de consola) y la guarda en `C:\Fnx_Backup\exes\foxbin2prg_studio`.
-4. **Abre Studio.** La ventana de consola se cierra sola.
+3. Si hay una más nueva, la **descarga** (verás el avance en MB en una ventana de consola) y **reemplaza el `FoxBin2Prg-Studio.exe` que está en la misma carpeta que el lanzador**.
+4. **Abre Studio** desde esa misma carpeta. La ventana de consola se cierra sola.
 
 No tienes que hacer nada más: abrir el lanzador *es* actualizar. Si no hay red, abre la copia que ya tenías; si una descarga se corta a la mitad, la copia anterior no se toca.
 
-- **Una sola copia por máquina.** En un servidor con varios usuarios (RDP) el `.exe` no se duplica por usuario: vive en esa carpeta única. Quien actualiza necesita permiso de escritura en ella; los demás usuarios abren la copia que ya está.
-- **Si Studio está abierto** (por otro usuario) no se puede reemplazar el `.exe`: el lanzador abre la copia vigente y actualiza la próxima vez que nadie lo tenga abierto.
+- **Todo junto, en una carpeta.** Junto al lanzador quedan `FoxBin2Prg-Studio.exe`, `installed.txt` (la versión instalada) y `launcher.log`. No hay copias ocultas en otras carpetas: para llevar Studio a otro sitio, mueve la carpeta entera.
+- **Si Studio está abierto**, no hace falta cerrarlo: el lanzador aparta el `.exe` en uso (`FoxBin2Prg-Studio.exe.old`), pone el nuevo y sigue. La ventana que ya tenías abierta continúa con la versión anterior hasta que la cierres; la próxima vez que abras Studio será la nueva. El `.old` se borra solo después.
+- **Necesita permiso de escritura** en esa carpeta. Si no lo tienes (por ejemplo, una carpeta de solo lectura), el lanzador abre la copia que haya y lo deja anotado en el log; mueve la carpeta a un sitio donde sí puedas escribir.
+- **Bitácora.** El lanzador deja un `launcher.log` ahí mismo, con el paso a paso: si algo no se baja, ahí está el motivo.
 - **Otra carpeta.** Se puede cambiar con la variable de entorno `FNX_STUDIO_DIR`.
-- **Bitácora.** El lanzador deja un `launcher.log` en esa carpeta, con el paso a paso: si algo no se baja, ahí está el motivo.
 
 ### Si abres el `.exe` directo
 

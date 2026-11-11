@@ -7,10 +7,14 @@ Fecha: 2026-10-28 16:40:37
 Mismo esquema que `fnxLauncher` de UtilitiesDevelopment. El equipo NO abre
 FoxBin2Prg-Studio.exe directo: abre FoxBin2Prg-Studio-Launcher.exe (un acceso
 directo). El lanzador consulta el ultimo Release de Studio en el canal de
-distribucion y, si hay una version mas nueva que la que esta maquina ya tiene, la
-baja a una carpeta UNICA por maquina (no una por usuario) y la ejecuta. Asi, en
-un servidor RDP con muchos usuarios, el .exe (~45 MB) no se duplica: se mantiene
-y actualiza en una sola ruta.
+distribucion y, si hay una version mas nueva que la que hay junto a el, la baja,
+REEMPLAZA el FoxBin2Prg-Studio.exe que esta en SU MISMA CARPETA y lo ejecuta desde
+ahi. Es decir: la carpeta del lanzador es la carpeta de Studio (el .exe, la marca
+installed.txt y el launcher.log viven juntos); no hay una copia oculta en otro sitio.
+
+Si Studio esta abierto, su .exe no se puede sobrescribir, pero Windows SI deja
+renombrarlo: se aparta como FoxBin2Prg-Studio.exe.old, se pone el nuevo en su lugar
+y el .old se borra la proxima vez que nadie lo tenga abierto.
 
 El canal es el repo PUBLICO `Fenix-Corp/Utilities-Dist` (el mismo de las
 Utilidades de Desarrollo; solo binarios). Como es publico, bajar NO requiere
@@ -60,12 +64,16 @@ TAG_PREFIX = "foxbin2prg-studio-v"
 #: Nombre del asset (el .exe de la aplicacion) dentro del Release.
 ASSET_NAME = "FoxBin2Prg-Studio.exe"
 
-#: Marca local con la etiqueta que esta maquina ya bajo, junto al .exe cacheado.
+#: Marca local con la etiqueta que se bajo, junto al .exe. `build\package.bat` la
+#: escribe en el paquete, asi que el .exe del zip no se vuelve a bajar a ciegas.
 MARKER_NAME = "installed.txt"
 
-#: Bitacora del lanzador, junto a la copia cacheada. El lanzador es de consola y su
-#: ventana se cierra sola: sin esto no habria forma de saber que paso.
+#: Bitacora del lanzador, junto al .exe. El lanzador es de consola y su ventana se
+#: cierra sola: sin esto no habria forma de saber que paso.
 LOG_NAME = "launcher.log"
+
+#: Sufijo con el que se aparta un .exe en uso para poner el nuevo en su lugar.
+OLD_SUFFIX = ".old"
 
 #: Si el log pasa de este tamano, se reinicia (no crece sin fin con los anios).
 LOG_MAX_BYTES = 512 * 1024
@@ -73,10 +81,9 @@ LOG_MAX_BYTES = 512 * 1024
 #: Techo de espera de la red. Corto: no hace falta mas para leer una lista.
 NET_TIMEOUT = 30
 
-#: Carpeta UNICA (por maquina) donde vive la copia ejecutable, el log y la marca.
-#: En servidores RDP con muchos usuarios NO se usa %LOCALAPPDATA%: duplicaria el
-#: .exe por usuario. Se puede redefinir con la variable de entorno FNX_STUDIO_DIR.
-DEFAULT_INSTALL_DIR = r"C:\Fnx_Backup\exes\foxbin2prg_studio"
+#: Por defecto el lanzador trabaja en SU carpeta (la del lanzador compilado). Esta
+#: variable de entorno la redefine: sirve para pruebas y para quien quiera mantener
+#: Studio en otro sitio.
 ENV_INSTALL_DIR = "FNX_STUDIO_DIR"
 
 
@@ -153,19 +160,71 @@ def needs_download(latest_tag: str, installed_tag: str | None, exe_exists: bool)
 # --------------------------------------------------------------- disco local
 
 
-def cache_dir() -> Path:
-    """La carpeta UNICA donde vive la copia ejecutable, la marca y el log.
+def install_dir() -> Path:
+    """La carpeta donde vive Studio: la del propio lanzador.
 
-    En un servidor RDP, quien ACTUALIZA (tecnico/admin) necesita permiso de
-    escritura aqui; los usuarios normales, con solo lectura/ejecucion, corren la
-    copia que ya este (ver `ensure_current`: una descarga que no se puede escribir
-    no borra la copia buena). Asi no se duplica el .exe por usuario.
+    Compilado (PyInstaller onefile), `sys.executable` es el .exe del lanzador, asi
+    que su carpeta es la que el usuario eligio (donde copio el lanzador). Desde
+    fuente (desarrollo) es la carpeta de este script. La variable FNX_STUDIO_DIR
+    manda sobre las dos.
+
+    Si el usuario no puede escribir ahi, el lanzador abre la copia que haya y no
+    actualiza (ver `ensure_current`: una descarga que no se puede escribir no borra
+    la copia buena); `can_write` permite avisarlo.
     """
-    carpeta = Path(os.environ.get(ENV_INSTALL_DIR) or DEFAULT_INSTALL_DIR)
-    # Puede existir sin permiso de creacion para este usuario; se usa igual.
+    override = os.environ.get(ENV_INSTALL_DIR)
+    if override:
+        carpeta = Path(override)
+        # Puede existir sin permiso de creacion para este usuario; se usa igual.
+        with contextlib.suppress(OSError):
+            carpeta.mkdir(parents=True, exist_ok=True)
+        return carpeta
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent
+    return Path(__file__).resolve().parent
+
+
+def can_write(carpeta: Path) -> bool:
+    """Si se puede crear un archivo en `carpeta` (sin dejar rastro)."""
+    prueba = carpeta / ".escritura.tmp"
+    try:
+        prueba.write_bytes(b"")
+        prueba.unlink()
+    except OSError:
+        return False
+    return True
+
+
+def replace_exe(nuevo: Path, destino: Path) -> None:
+    """Pone `nuevo` en lugar de `destino`, aunque `destino` este en uso.
+
+    Un .exe que esta corriendo no se puede sobrescribir, pero Windows si deja
+    RENOMBRARLO. Entonces: primero se intenta el reemplazo directo; si lo impide un
+    .exe en uso, se aparta el viejo como `<nombre>.old`, se pone el nuevo en su sitio
+    y, si eso falla, se deshace. El `.old` lo borra `cleanup_old` cuando ya nadie lo
+    tenga abierto. Lanza OSError si no se pudo.
+    """
+    try:
+        nuevo.replace(destino)
+        return
+    except PermissionError:
+        pass
+
+    viejo = destino.with_name(destino.name + OLD_SUFFIX)
     with contextlib.suppress(OSError):
-        carpeta.mkdir(parents=True, exist_ok=True)
-    return carpeta
+        viejo.unlink()  # un .old de una actualizacion anterior
+    destino.rename(viejo)
+    try:
+        nuevo.replace(destino)
+    except OSError:
+        viejo.rename(destino)  # deshacer: mejor el .exe de antes que ninguno
+        raise
+
+
+def cleanup_old(carpeta: Path) -> None:
+    """Borra el `.old` de una actualizacion anterior, si ya nadie lo tiene abierto."""
+    with contextlib.suppress(OSError):
+        (carpeta / (ASSET_NAME + OLD_SUFFIX)).unlink()
 
 
 def read_marker(carpeta: Path) -> str | None:
@@ -251,9 +310,9 @@ def download_api(
 ) -> bool:
     """Baja el asset del Release `tag` a `carpeta` desde el canal publico.
 
-    Se baja a un archivo temporal y se renombra al final: si la descarga se corta
-    a la mitad, o el .exe esta en uso por otro usuario, la copia buena anterior no
-    se toca.
+    Se baja a un archivo temporal (`.part`) y solo al final reemplaza al .exe: si la
+    descarga se corta a la mitad la copia buena anterior no se toca, y si el .exe
+    esta en uso (Studio abierto) se aparta y se reemplaza igual (`replace_exe`).
     """
     try:
         with urllib.request.urlopen(_api_request("/releases/tags/" + tag, token), timeout=NET_TIMEOUT) as r:  # noqa: S310
@@ -268,7 +327,7 @@ def download_api(
         with urllib.request.urlopen(_download_request(url), timeout=NET_TIMEOUT) as r:  # noqa: S310
             total = int(r.headers.get("Content-Length") or 0)
             _stream_to_file(r, temporal, total, say)
-        temporal.replace(destino)
+        replace_exe(temporal, destino)
         return True
     except urllib.error.HTTPError as err:
         say(f"No se pudo bajar {tag}: HTTP {err.code}")
@@ -358,11 +417,16 @@ def _pause() -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    carpeta = cache_dir()
+    carpeta = install_dir()
     say = make_say(carpeta)
     say("---- FoxBin2Prg-Studio-Launcher: inicio ----")
-    say(f"cache: {carpeta}")
+    say(f"carpeta: {carpeta}")
     say(f"fuente: {REPO} (publico)")
+    cleanup_old(carpeta)
+    if not can_write(carpeta):
+        say("AVISO: no se puede escribir en esa carpeta: no se podra actualizar.")
+        say("       Se abrira la copia que haya. Para actualizar, mueve el lanzador")
+        say("       a una carpeta donde tengas permiso de escritura.")
 
     # Token OPCIONAL: solo sube el limite de rate. El canal es publico.
     token = (os.environ.get("FNX_GH_TOKEN") or "").strip() or None
